@@ -1,7 +1,11 @@
+#intellij
 .idea
+
 .iml
 .target
 .log
+
+#vscode
 .vscode
 .DS_Store
 .Thumbs.db
