@@ -1,3 +1,7 @@
 /*
     Logica principal da personalização do codigo
 */
+
+:horizontal {
+    background-color: aqua;
+}
