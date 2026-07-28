@@ -4,6 +4,7 @@
 .iml
 .target
 .log
+.MARKDOWN.md
 
 #vscode
 .vscode
