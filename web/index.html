@@ -22,5 +22,81 @@
     <button>
         Habitos
     </button>
+    <div class="dashboard-container">
+        <!--Cabeçalho-->
+        <header class="header">
+            <h1>Painel de Desempenho</h1>
+        </header>
+
+        <!-- Cards de Métricas Rápidas-->
+         <section class="metrics-grid">
+            <article class="card">
+                <h3>Total de Contribuições</h3>
+                <p class="metric-value">1,428</p>
+            </article>
+            <article class="card">
+                <h3>Sequencia Atual</h3>
+                <p class="metric-value">12 dias</p>
+            </article>
+            <article class="card">
+                <h3>Maior Sequencia</h3>
+                <p class="metric-value">45 dias</p>
+            </article>
+         </section>
+
+         <!-- Painel do Mapa de Calor-->
+           <section class="card heatmap-card">
+      <h2>Atividade no Último Ano</h2>
+
+      <!-- Container do Mapa de Calor -->
+      <div class="heatmap-wrapper">
+        
+        <!-- Rótulos dos Dias da Semana -->
+        <ul class="weekdays">
+          <li>Seg</li>
+          <li>Qua</li>
+          <li>Sexta</li>
+        </ul>
+
+        <!-- Grade de Contribuições (Semanas em Colunas x 7 Dias) -->
+        <div class="heatmap-grid">
+          <!-- Semana 1 -->
+          <div class="week">
+            <span class="day level-0" data-tooltip="Sem contribuições"></span>
+            <span class="day level-1" data-tooltip="1 contribuição"></span>
+            <span class="day level-2" data-tooltip="3 contribuições"></span>
+            <span class="day level-0" data-tooltip="Sem contribuições"></span>
+            <span class="day level-3" data-tooltip="6 contribuições"></span>
+            <span class="day level-4" data-tooltip="12 contribuições"></span>
+            <span class="day level-1" data-tooltip="2 contribuições"></span>
+          </div>
+
+          <!-- Semana 2 -->
+          <div class="week">
+            <span class="day level-2" data-tooltip="4 contribuições"></span>
+            <span class="day level-3" data-tooltip="7 contribuições"></span>
+            <span class="day level-4" data-tooltip="10 contribuições"></span>
+            <span class="day level-1" data-tooltip="1 contribuição"></span>
+            <span class="day level-0" data-tooltip="Sem contribuições"></span>
+            <span class="day level-2" data-tooltip="3 contribuições"></span>
+            <span class="day level-1" data-tooltip="2 contribuições"></span>
+          </div>
+
+          <!-- Adicione mais colunas .week conforme necessário -->
+        </div>
+      </div>
+
+      <!-- Legenda do Mapa de Calor -->
+      <div class="heatmap-legend">
+        <span>Menos</span>
+        <span class="day level-0"></span>
+        <span class="day level-1"></span>
+        <span class="day level-2"></span>
+        <span class="day level-3"></span>
+        <span class="day level-4"></span>
+        <span>Mais</span>
+      </div>
+    </section>
+    </div>
 </body>
 </html>
