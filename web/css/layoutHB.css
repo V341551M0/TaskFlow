@@ -1,0 +1,146 @@
+:root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+  --border-color: #30363d;
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+
+  /* Níveis de Intensidade do Mapa de Calor */
+  --color-level-0: #161b22;
+  --color-level-1: #0e4429;
+  --color-level-2: #006d32;
+  --color-level-3: #26a641;
+  --color-level-4: #39d353;
+}
+
+/* --- Estilos Gerais --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 2rem;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --- Cards do Dashboard --- */
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 1.25rem;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.metrics-grid h3 {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+/* --- Layout do Mapa de Calor --- */
+.heatmap-card h2 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.heatmap-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.weekdays {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding-top: 2px;
+}
+
+.heatmap-grid {
+  display: flex;
+  gap: 3px;
+}
+
+/* Cada semana é uma coluna de 7 dias */
+.week {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Células individuais dos dias */
+.day {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  outline: 1px solid rgba(27, 31, 36, 0.04);
+  position: relative;
+  cursor: pointer;
+}
+
+/* Estilização por nível de intensidade */
+.level-0 { background-color: var(--color-level-0); border: 1px solid var(--border-color); }
+.level-1 { background-color: var(--color-level-1); }
+.level-2 { background-color: var(--color-level-2); }
+.level-3 { background-color: var(--color-level-3); }
+.level-4 { background-color: var(--color-level-4); }
+
+/* Feedback visual de hover */
+.day:hover {
+  outline: 1px solid var(--text-primary);
+}
+
+/* --- Tooltip simples com pure CSS --- */
+.day[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #6e7681;
+  color: #ffffff;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* --- Legenda --- */
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.75rem;
+}

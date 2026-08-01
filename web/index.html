@@ -1,652 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>TaskFlow</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Dashboard</title>
+    <!-- Conexão com o arquivo CSS externo -->
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <h1>
-        TaskFlow (Gernciador de Tarefas)
-    </h1>
-    <h2>
-        <p>Seu gerenciador de habitos e tarefas, com historico e analise de dashboard!</p>
-    </h2>
-    <button>
-        Tarefas
-    </button>
-    <button>
-        Tarefas Recorrentes
-    </button>
-    <button>
-        Habitos
-    </button>
     <div class="dashboard-container">
-        <!--Cabeçalho-->
+        <!-- Cabeçalho do Painel -->
         <header class="header">
             <h1>Painel de Desempenho</h1>
+            <p>Acompanhe a evolução de hábitos e tarefas através de gráficos</p>
         </header>
 
-        <!-- Cards de Métricas Rápidas-->
-         <section class="metrics-grid">
-            <article class="card">
-                <h3>Total de Habitos e Tarefas Recorrentes Concluidas</h3>
-                <p class="metric-value">0/-</p>
+        <!-- Navegação de Páginas -->
+        <nav class="nav-buttons">
+            <button>Tarefas</button>
+            <button>Tarefas Recorrentes</button>
+            <button onclick="window.location.href='pages/HabitTask.html'">Hábitos</button>
+        </nav>
+
+        <!-- Grade Principal de Gráficos -->
+        <section class="charts-grid">
+            
+            <!-- Gráfico 1: Barras (Desempenho Semanal) -->
+            <article class="card chart-card">
+                <div class="chart-header">
+                    <h3>Desempenho Semanal</h3>
+                    <span class="metric-value" id="weekly-total">--</span>
+                </div>
+                <div class="chart-container">
+                    <svg class="bar-chart-svg" viewBox="0 0 300 150">
+                        <!-- Linhas de Grade de Fundo -->
+                        <line class="chart-grid-line" x1="0" y1="30" x2="300" y2="30" />
+                        <line class="chart-grid-line" x1="0" y1="75" x2="300" y2="75" />
+                        <line class="chart-grid-line" x1="0" y1="120" x2="300" y2="120" />
+                        
+                        <!-- Barras dos Dias da Semana (Sem alturas estáticas) -->
+                        <rect class="chart-bar" x="20" y="120" width="20" height="0" />
+                        <rect class="chart-bar" x="60" y="120" width="20" height="0" />
+                        <rect class="chart-bar" x="100" y="120" width="20" height="0" />
+                        <rect class="chart-bar" x="140" y="120" width="20" height="0" />
+                        <rect class="chart-bar" x="180" y="120" width="20" height="0" />
+                        <rect class="chart-bar" x="220" y="120" width="20" height="0" />
+                        <rect class="chart-bar" x="260" y="120" width="20" height="0" />
+                    </svg>
+                    <!-- Rótulos dos Dias da Semana -->
+                    <div class="chart-labels">
+                        <span>Seg</span>
+                        <span>Ter</span>
+                        <span>Qua</span>
+                        <span>Qui</span>
+                        <span>Sex</span>
+                        <span>Sáb</span>
+                        <span>Dom</span>
+                    </div>
+                </div>
             </article>
-            <article class="card">
-                <h3>Sequencia Atual</h3>
-                <p class="metric-value">0/-</p>
+
+            <!-- Gráfico 2: Linha (Evolução Mensal) -->
+            <article class="card chart-card">
+                <div class="chart-header">
+                    <h3>Evolução Mensal</h3>
+                    <span class="metric-value" id="monthly-rate">--%</span>
+                </div>
+                <div class="chart-container">
+                    <svg class="line-chart-svg" viewBox="0 0 300 150">
+                        <!-- Linhas de Grade de Fundo -->
+                        <line class="chart-grid-line" x1="0" y1="30" x2="300" y2="30" />
+                        <line class="chart-grid-line" x1="0" y1="75" x2="300" y2="75" />
+                        <line class="chart-grid-line" x1="0" y1="120" x2="300" y2="120" />
+
+                        <!-- Linha do Gráfico (Preenchida via JS futuramente) -->
+                        <path class="chart-line" d="M 0 120" />
+                    </svg>
+                </div>
             </article>
-            <article class="card">
-                <h3>Maior Sequencia</h3>
-                <p class="metric-value">0/-</p>
+
+            <!-- Gráfico 3: Rosca/Donut (Distribuição por Categoria) -->
+            <article class="card chart-card">
+                <div class="chart-header">
+                    <h3>Distribuição de Conclusão</h3>
+                    <span class="metric-value" id="completion-ratio">-- / --</span>
+                </div>
+                <div class="chart-container donut-container">
+                    <svg class="donut-chart-svg" viewBox="0 0 100 100">
+                        <!-- Círculo de Fundo -->
+                        <circle class="donut-bg" cx="50" cy="50" r="40" />
+                        <!-- Círculo de Progresso -->
+                        <circle class="donut-segment" cx="50" cy="50" r="40" />
+                    </svg>
+                </div>
             </article>
-         </section>
 
-         <!-- Painel do Mapa de Calor-->
-           <section class="card heatmap-card">
-      <h2>Atividade no Último Ano</h2>
+        </section>
 
-      <!-- Container do Mapa de Calor -->
-      <div class="heatmap-wrapper">
-        
-        <!-- Rótulos dos Dias da Semana -->
-        <ul class="weekdays">
-          <li>Seg</li>
-          <li>Qua</li>
-          <li>Sexta</li>
-        </ul>
-
-        <!-- Grade de Contribuições (Semanas em Colunas x 7 Dias) -->
-        <div class="heatmap-grid">
-           <!-- Semana 01 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 02 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 03 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 04 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 05 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 06 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 07 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 08 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 09 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 10 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 11 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 12 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 13 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 14 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 15 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 16 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 17 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 18 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 19 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 20 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 21 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 22 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 23 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 24 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 25 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 26 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 27 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 28 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 29 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 30 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 31 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 32 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 33 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 34 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 35 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 36 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 37 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 38 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 39 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 40 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 41 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 42 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 43 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 44 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 45 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 46 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 47 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 48 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 49 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 50 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 51 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-
-    <!-- Semana 52 -->
-    <div class="week">
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-        <span class="day level-0"></span>
-    </div>
-</div>
-
-          <!-- Adicione mais colunas .week conforme necessário -->
-        </div>
-      </div>
-
-      <!-- Legenda do Mapa de Calor -->
-      <div class="heatmap-legend">
-        <span>Menos</span>
-        <span class="day level-0"></span>
-        <span class="day level-1"></span>
-        <span class="day level-2"></span>
-        <span class="day level-3"></span>
-        <span class="day level-4"></span>
-        <span>Mais</span>
-      </div>
-    </section>
+        <!-- Seção de Histórico / Resumo -->
+        <section class="card history-summary-card">
+            <h2>Resumo das Atividades</h2>
+            <div id="activity-summary-container">
+                <!-- Conteúdo preenchido dinamicamente via JS -->
+            </div>
+        </section>
     </div>
 </body>
 </html>
