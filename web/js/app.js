@@ -21,6 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
       botao.addEventListener("click", function () {
         window.location.href = "pages/RecurringTask.html";
       });
+    } else if (texto.includes("Voltar para Pagina Inicial") || texto.includes("Voltar para Página Inicial")) {
+      botao.addEventListener("click", function () {
+        window.location.href = "../index.html";
+      });
     }
   });
 });

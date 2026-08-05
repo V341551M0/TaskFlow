@@ -4,28 +4,29 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>Tarefas</title>
-    <link rel='stylesheet' href='/css/layoutTK.css'>
+    <link rel="stylesheet" href="../css/layoutTK.css">
 </head>
 <body>
-    <!-- Botões de Navegação -->
-    <nav class="nav-buttons">
-        <button>Voltar para Pagina Inicial</button>
-    </nav>
+    <div class="dashboard-container">
+        <!-- Botões de Navegação -->
+        <nav class="nav-buttons">
+            <button>Voltar para Pagina Inicial</button>
+        </nav>
 
-    </section class="metric-grid">
-        <article class="card">
-            <h3>Tarefas</h3>
-            <p class="metric-values">0/-</p>
-        </article>
-        <article class="card">
-            <h3>Sequencia Atual</h3>
-            <p class="metric-values">0/-</p>
-        </article>
-        <article class="card">
-            <h3>Maior Sequencia</h3>
-            <p class="metric-values">0/-</p>
-        </article>
-    </section>
+        <section class="metrics-grid">
+            <article class="card">
+                <h3>Tarefas</h3>
+                <p class="metric-value">0/-</p>
+            </article>
+            <article class="card">
+                <h3>Sequencia Atual</h3>
+                <p class="metric-value">0/-</p>
+            </article>
+            <article class="card">
+                <h3>Maior Sequencia</h3>
+                <p class="metric-value">0/-</p>
+            </article>
+        </section>
 
     <!-- Painel do Mapa de Calor-->
            <section class="card heatmap-card">
@@ -632,5 +633,6 @@
       </div>
     </section>
     </div>
+    <script src="../js/app.js"></script>
 </body>
 </html>
