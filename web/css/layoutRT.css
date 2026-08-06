@@ -41,6 +41,12 @@ body {
   gap: 1.5rem;
 }
 
+.container-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .new-class-button button{
   background-color: var(--bg-secondary);
   color: var(--text-primary);
