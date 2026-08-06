@@ -1,0 +1,15 @@
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/util/TaskUtil.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/exceptions/TaskExceptions.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/controller/TaskController.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/app/TaskApplication.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/History.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Note.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Habit.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Category.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Activity.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/service/TaskService.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/TaskModel.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/RecurringTask.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/dto/TaskDto.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/repository/TaskRepository.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Task.java

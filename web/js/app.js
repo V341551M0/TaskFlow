@@ -2,15 +2,12 @@
     Logica da web e comunicação com backend
 */
 document.addEventListener("DOMContentLoaded", function () {
-  // Seleciona todos os botões da navegação
   const botoes = document.querySelectorAll(".nav-buttons button");
 
-  // Adiciona o evento de clique nos botões de navegação
   botoes.forEach(function (botao) {
     const texto = botao.textContent.trim();
     if (texto === "Hábitos") {
       botao.addEventListener("click", function () {
-        // Redireciona para a página HabitTask.html na pasta pages
         window.location.href = "pages/HabitTask.html";
       });
     } else if (texto === "Tarefas") {
@@ -27,38 +24,104 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   });
-});
 
-// Abrir o modal
-document.querySelector('.new-class-button button').addEventListener('click', () => {
-    document.getElementById('modal-task').style.display = 'flex';
-});
+  const createButton = document.querySelector('.new-class-button button');
+  const modal = document.getElementById('modal-task');
+  const closeButton = document.querySelector('.close-btn');
+  const form = document.getElementById('form-task');
 
-// Fechar o modal ao clicar no botão 'x'
-document.querySelector('.close-btn').addEventListener('click', () => {
-    document.getElementById('modal-task').style.display = 'none';
-});
+  if (createButton) {
+    createButton.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+  }
 
-// Enviar os dados para o servidor Java
-document.getElementById('form-task').addEventListener('submit', async (event) => {
-    event.preventDefault(); // Impede recarregar a página
+  if (closeButton) {
+    closeButton.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
 
-    const dados = {
+  if (form) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const dados = {
         nome: document.getElementById('nome').value,
         data: document.getElementById('data').value,
         todosOsDias: document.getElementById('diario').checked,
         vezesAoDia: document.getElementById('vezes-dia').value
-    };
+      };
 
-    // Envia os dados para a API Java
-    const resposta = await fetch('/api/tasks', {
+      const pageType = window.location.pathname.includes('HabitTask') ? 'habit' : window.location.pathname.includes('RecurringTask') ? 'recurring' : 'task';
+      const resposta = await fetch(`http://localhost:8080/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
-    });
+      });
 
-    if (resposta.ok) {
-        alert('Criado com sucesso!');
-        document.getElementById('modal-task').style.display = 'none';
-    }
+      if (resposta.ok) {
+        modal.style.display = 'none';
+        form.reset();
+        loadItems();
+      }
+    });
+  }
+
+  loadItems();
 });
+
+async function loadItems() {
+  try {
+    const [tasksResponse, habitsResponse, recurringResponse] = await Promise.all([
+      fetch('http://localhost:8080/api/tasks'),
+      fetch('http://localhost:8080/api/habits'),
+      fetch('http://localhost:8080/api/recurring-tasks')
+    ]);
+
+    const tasks = await tasksResponse.json();
+    const habits = await habitsResponse.json();
+    const recurringTasks = await recurringResponse.json();
+
+    renderList('dashboard-list', [...tasks, ...habits, ...recurringTasks]);
+    renderList('task-list', tasks);
+    renderList('habit-list', habits);
+    renderList('recurring-list', recurringTasks);
+
+    updateMetrics(tasks, habits, recurringTasks);
+  } catch (error) {
+    console.error('Erro ao carregar itens:', error);
+  }
+}
+
+function renderList(containerId, items) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    return;
+  }
+
+  if (!items || items.length === 0) {
+    container.innerHTML = '<p class="empty-state">Nenhum item cadastrado ainda.</p>';
+    return;
+  }
+
+  container.innerHTML = items.map(item => `
+    <article class="item-card">
+      <div>
+        <strong>${item.name}</strong>
+        <p>${item.date || 'Sem data'}</p>
+      </div>
+      <span class="item-badge">${item.type || 'item'}</span>
+    </article>
+  `).join('');
+}
+
+function updateMetrics(tasks, habits, recurringTasks) {
+  const taskCount = document.getElementById('task-count');
+  const habitCount = document.getElementById('habit-count');
+  const recurringCount = document.getElementById('recurring-count');
+
+  if (taskCount) taskCount.textContent = `${tasks.length}/-`;
+  if (habitCount) habitCount.textContent = `${habits.length}/-`;
+  if (recurringCount) recurringCount.textContent = `${recurringTasks.length}/-`;
+}

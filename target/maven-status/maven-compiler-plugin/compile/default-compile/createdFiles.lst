@@ -1,0 +1,15 @@
+model/Habit.class
+main/java/model/Task.class
+repository/TaskRepository.class
+service/TaskService.class
+model/History.class
+exceptions/TaskExceptions.class
+dto/TaskDto.class
+app/TaskApplication.class
+model/TaskModel.class
+controller/TaskController.class
+model/Note.class
+main/java/model/Activity.class
+util/TaskUtil.class
+main/java/model/RecurringTask.class
+model/Category.class
