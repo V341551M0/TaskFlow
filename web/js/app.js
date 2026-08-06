@@ -1,6 +1,8 @@
 /*
     Logica da web e comunicação com backend
 */
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'http://localhost:8080';
+
 document.addEventListener("DOMContentLoaded", function () {
   const botoes = document.querySelectorAll(".nav-buttons button");
 
@@ -54,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
       };
 
       const pageType = window.location.pathname.includes('HabitTask') ? 'habit' : window.location.pathname.includes('RecurringTask') ? 'recurring' : 'task';
-      const resposta = await fetch(`http://localhost:8080/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`, {
+      const resposta = await fetch(`${API_BASE_URL}/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
@@ -74,9 +76,9 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadItems() {
   try {
     const [tasksResponse, habitsResponse, recurringResponse] = await Promise.all([
-      fetch('http://localhost:8080/api/tasks'),
-      fetch('http://localhost:8080/api/habits'),
-      fetch('http://localhost:8080/api/recurring-tasks')
+      fetch(`${API_BASE_URL}/api/tasks`),
+      fetch(`${API_BASE_URL}/api/habits`),
+      fetch(`${API_BASE_URL}/api/recurring-tasks`)
     ]);
 
     const tasks = await tasksResponse.json();

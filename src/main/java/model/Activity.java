@@ -1,4 +1,4 @@
-package main.java.model;
+package model;
 
 public class Activity {
     public static void mActivity() {

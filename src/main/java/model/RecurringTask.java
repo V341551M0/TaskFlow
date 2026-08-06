@@ -1,7 +1,7 @@
-package main.java.model;
+package model;
 
 public class RecurringTask {
-    public static void mRecurring() {
+    public static void mRTask() {
         
     }
 }
