@@ -28,3 +28,37 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+// Abrir o modal
+document.querySelector('.new-class-button button').addEventListener('click', () => {
+    document.getElementById('modal-task').style.display = 'flex';
+});
+
+// Fechar o modal ao clicar no botão 'x'
+document.querySelector('.close-btn').addEventListener('click', () => {
+    document.getElementById('modal-task').style.display = 'none';
+});
+
+// Enviar os dados para o servidor Java
+document.getElementById('form-task').addEventListener('submit', async (event) => {
+    event.preventDefault(); // Impede recarregar a página
+
+    const dados = {
+        nome: document.getElementById('nome').value,
+        data: document.getElementById('data').value,
+        todosOsDias: document.getElementById('diario').checked,
+        vezesAoDia: document.getElementById('vezes-dia').value
+    };
+
+    // Envia os dados para a API Java
+    const resposta = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+    });
+
+    if (resposta.ok) {
+        alert('Criado com sucesso!');
+        document.getElementById('modal-task').style.display = 'none';
+    }
+});
