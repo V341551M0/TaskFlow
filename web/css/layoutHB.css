@@ -87,10 +87,77 @@ body {
 }
 
 .modal-content {
-  background-color: var(--bg-secondary);
+  background: linear-gradient(145deg, var(--bg-secondary), #202834);
   padding: 2rem;
+  border-radius: 16px;
+  width: min(92vw, 420px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-content h2 {
+  margin-bottom: 0.35rem;
+}
+
+.modal-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-content label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
   border-radius: 8px;
-  width: 400px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.modal-content input:focus {
+  outline: 1px solid var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.modal-content button[type="submit"] {
+  margin-top: 0.5rem;
+  padding: 0.7rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+  color: #07110a;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cose-btn {
+  float: right;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--text-secondary);
 }
 
 /* --- Cards do Dashboard --- */

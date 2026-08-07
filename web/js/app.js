@@ -243,14 +243,32 @@ async function setItemStatus(id, type, date, action) {
   const item = list.find((entry) => entry.id === id);
   if (item) {
     const delta = Number(item.frequencyPerDay || 1);
-    item.status = status;
-    item.completedToday = status === 'completed';
+    const previousStatus = item.status || (item.completedToday ? 'completed' : 'pending');
+    const completionDate = date || item.date || new Date().toISOString().slice(0, 10);
+    const normalizedState = status === 'completed' ? 'completed' : status === 'failed' ? 'failed' : 'pending';
+
+    item.status = normalizedState;
+    item.completedToday = normalizedState === 'completed';
     item.completionCount = item.completionCount || 0;
-    if (status === 'completed') {
+    if (normalizedState === 'completed') {
       item.completionCount += delta;
-    } else if (status === 'failed' || status === 'pending') {
+    } else if (normalizedState === 'failed' || normalizedState === 'pending') {
       item.completionCount = Math.max(0, item.completionCount - delta);
     }
+
+    localState.heatmap = localState.heatmap || {};
+    const currentValue = Number(localState.heatmap[completionDate] || 0);
+    let nextValue = currentValue;
+    if (normalizedState === 'completed') {
+      nextValue = currentValue + delta;
+    } else if (normalizedState === 'failed') {
+      nextValue = currentValue - delta;
+    } else if (previousStatus === 'completed') {
+      nextValue = currentValue - delta;
+    } else if (previousStatus === 'failed') {
+      nextValue = currentValue + delta;
+    }
+    localState.heatmap[completionDate] = nextValue;
   }
   persistLocalState(localState);
   await loadItems();
