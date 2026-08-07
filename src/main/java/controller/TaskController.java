@@ -24,7 +24,9 @@ public class TaskController {
         server.createContext("/api/tasks", this::handleTasks);
         server.createContext("/api/habits", this::handleHabits);
         server.createContext("/api/recurring-tasks", this::handleRecurringTasks);
+        server.createContext("/api/complete", this::handleComplete);
         server.createContext("/api/dashboard", this::handleDashboard);
+        server.createContext("/api/heatmap", this::handleHeatmap);
     }
 
     private void handleTasks(HttpExchange exchange) throws IOException {
@@ -39,22 +41,49 @@ public class TaskController {
         handleItemRequest(exchange, "recurring");
     }
 
+    private void handleComplete(HttpExchange exchange) throws IOException {
+        String method = exchange.getRequestMethod();
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            sendCors(exchange, 204);
+            return;
+        }
+
+        if ("POST".equalsIgnoreCase(method)) {
+            String body = readBody(exchange);
+            Map<String, String> data = parseJsonBody(body);
+            TaskDto updated = taskService.toggleCompletion(data.get("id"), data.get("type"), data.get("date"));
+            if (updated == null) {
+                sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+                return;
+            }
+            sendJson(exchange, 200, updated);
+            return;
+        }
+
+        sendJson(exchange, 405, Map.of("message", "Method not allowed"));
+    }
+
     private void handleDashboard(HttpExchange exchange) throws IOException {
         Map<String, Object> payload = new HashMap<>();
         payload.put("tasks", taskService.listTasks());
         payload.put("habits", taskService.listHabits());
         payload.put("recurringTasks", taskService.listRecurringTasks());
+        payload.put("heatmap", taskService.getDailyHeatmap());
         sendJson(exchange, 200, payload);
+    }
+
+    private void handleHeatmap(HttpExchange exchange) throws IOException {
+        if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+            sendCors(exchange, 204);
+            return;
+        }
+        sendJson(exchange, 200, taskService.getDailyHeatmap());
     }
 
     private void handleItemRequest(HttpExchange exchange, String type) throws IOException {
         String method = exchange.getRequestMethod();
         if ("OPTIONS".equalsIgnoreCase(method)) {
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
-            exchange.sendResponseHeaders(204, -1);
-            exchange.close();
+            sendCors(exchange, 204);
             return;
         }
 
@@ -108,6 +137,14 @@ public class TaskController {
         return values;
     }
 
+    private void sendCors(HttpExchange exchange, int statusCode) throws IOException {
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        exchange.sendResponseHeaders(statusCode, -1);
+        exchange.close();
+    }
+
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
         String payload = toJson(body);
         byte[] response = payload.getBytes(StandardCharsets.UTF_8);
@@ -153,7 +190,7 @@ public class TaskController {
             return builder.append("]").toString();
         }
         if (body instanceof TaskDto dto) {
-            return "{\"id\":\"" + escape(dto.getId()) + "\",\"name\":\"" + escape(dto.getName()) + "\",\"date\":\"" + escape(dto.getDate()) + "\",\"allDays\":" + dto.isAllDays() + ",\"frequencyPerDay\":\"" + escape(dto.getFrequencyPerDay()) + "\",\"type\":\"" + escape(dto.getType()) + "\"}";
+            return "{\"id\":\"" + escape(dto.getId()) + "\",\"name\":\"" + escape(dto.getName()) + "\",\"date\":\"" + escape(dto.getDate()) + "\",\"allDays\":" + dto.isAllDays() + ",\"frequencyPerDay\":\"" + escape(dto.getFrequencyPerDay()) + "\",\"type\":\"" + escape(dto.getType()) + "\",\"completedToday\":" + dto.isCompletedToday() + ",\"completionCount\":" + dto.getCompletionCount() + "}";
         }
         return "\"\"";
     }

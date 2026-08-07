@@ -29,20 +29,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const createButton = document.querySelector('.new-class-button button');
   const modal = document.getElementById('modal-task');
-  const closeButton = document.querySelector('.close-btn');
+  const closeButtons = document.querySelectorAll('.close-btn, .cose-btn');
   const form = document.getElementById('form-task');
 
   if (createButton) {
     createButton.addEventListener('click', () => {
-      modal.style.display = 'flex';
+      if (modal) {
+        modal.style.display = 'flex';
+      }
     });
   }
 
-  if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      modal.style.display = 'none';
+  closeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      if (modal) {
+        modal.style.display = 'none';
+      }
     });
-  }
+  });
 
   if (form) {
     form.addEventListener('submit', async (event) => {
@@ -63,7 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (resposta.ok) {
-        modal.style.display = 'none';
+        if (modal) {
+          modal.style.display = 'none';
+        }
         form.reset();
         loadItems();
       }
@@ -84,13 +90,15 @@ async function loadItems() {
     const tasks = await tasksResponse.json();
     const habits = await habitsResponse.json();
     const recurringTasks = await recurringResponse.json();
+    const allItems = [...tasks, ...habits, ...recurringTasks];
 
-    renderList('dashboard-list', [...tasks, ...habits, ...recurringTasks]);
+    renderList('dashboard-list', allItems);
     renderList('task-list', tasks);
     renderList('habit-list', habits);
     renderList('recurring-list', recurringTasks);
 
     updateMetrics(tasks, habits, recurringTasks);
+    renderHeatmap(allItems);
   } catch (error) {
     console.error('Erro ao carregar itens:', error);
   }
@@ -113,9 +121,39 @@ function renderList(containerId, items) {
         <strong>${item.name}</strong>
         <p>${item.date || 'Sem data'}</p>
       </div>
-      <span class="item-badge">${item.type || 'item'}</span>
+      <div class="item-actions">
+        <span class="item-badge">${item.type || 'item'}</span>
+        <label class="completion-toggle">
+          <input type="checkbox" class="completion-checkbox" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}" ${item.completedToday ? 'checked' : ''}>
+          <span>Marcar</span>
+        </label>
+      </div>
     </article>
   `).join('');
+
+  document.querySelectorAll('.completion-checkbox').forEach((checkbox) => {
+    checkbox.addEventListener('change', async (event) => {
+      event.stopPropagation();
+      const target = event.currentTarget;
+      await markItemAsCompleted(target.dataset.id, target.dataset.type, target.dataset.date);
+    });
+  });
+}
+
+async function markItemAsCompleted(id, type, date) {
+  try {
+    const resposta = await fetch(`${API_BASE_URL}/api/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, type, date })
+    });
+
+    if (resposta.ok) {
+      await loadItems();
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar atividade:', error);
+  }
 }
 
 function updateMetrics(tasks, habits, recurringTasks) {
@@ -126,4 +164,77 @@ function updateMetrics(tasks, habits, recurringTasks) {
   if (taskCount) taskCount.textContent = `${tasks.length}/-`;
   if (habitCount) habitCount.textContent = `${habits.length}/-`;
   if (recurringCount) recurringCount.textContent = `${recurringTasks.length}/-`;
+}
+
+function renderHeatmap(items) {
+  const heatmapGrid = document.querySelector('.heatmap-grid');
+  if (!heatmapGrid) {
+    return;
+  }
+
+  const heatmapData = buildHeatmapData(items);
+  const daysToShow = 112;
+  const cells = [];
+  const today = new Date();
+
+  for (let index = daysToShow - 1; index >= 0; index -= 1) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - index);
+    const isoDate = formatIsoDate(date);
+    const value = heatmapData[isoDate] || 0;
+    const level = getHeatLevel(value);
+    cells.push(`<span class="day level-${level}" data-tooltip="${formatDateLabel(date)}: ${value} contribuições"></span>`);
+  }
+
+  const weeks = [];
+  while (cells.length) {
+    weeks.push(`<div class="week">${cells.splice(0, 7).join('')}</div>`);
+  }
+
+  heatmapGrid.innerHTML = weeks.join('');
+}
+
+function buildHeatmapData(items) {
+  const heatmapData = {};
+
+  items.forEach((item) => {
+    const date = item.date;
+    if (!date) {
+      return;
+    }
+
+    const contribution = item.completedToday ? Number(item.frequencyPerDay || 1) : 0;
+    if (contribution > 0) {
+      heatmapData[date] = (heatmapData[date] || 0) + contribution;
+    }
+  });
+
+  return heatmapData;
+}
+
+function getHeatLevel(value) {
+  if (value <= 0) {
+    return 0;
+  }
+  if (value <= 1) {
+    return 1;
+  }
+  if (value <= 2) {
+    return 2;
+  }
+  if (value <= 4) {
+    return 3;
+  }
+  return 4;
+}
+
+function formatIsoDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateLabel(date) {
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
 }

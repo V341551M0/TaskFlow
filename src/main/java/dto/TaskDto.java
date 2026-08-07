@@ -7,6 +7,8 @@ public class TaskDto {
     private boolean allDays;
     private String frequencyPerDay;
     private String type;
+    private boolean completedToday;
+    private int completionCount;
 
     public TaskDto() {
     }
@@ -18,6 +20,8 @@ public class TaskDto {
         this.allDays = allDays;
         this.frequencyPerDay = frequencyPerDay;
         this.type = type;
+        this.completedToday = false;
+        this.completionCount = 0;
     }
 
     public String getId() {
@@ -66,5 +70,21 @@ public class TaskDto {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public boolean isCompletedToday() {
+        return completedToday;
+    }
+
+    public void setCompletedToday(boolean completedToday) {
+        this.completedToday = completedToday;
+    }
+
+    public int getCompletionCount() {
+        return completionCount;
+    }
+
+    public void setCompletionCount(int completionCount) {
+        this.completionCount = completionCount;
     }
 }

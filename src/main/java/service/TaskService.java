@@ -1,5 +1,6 @@
 package service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,22 @@ public class TaskService {
         boolean allDays = Boolean.parseBoolean(data.getOrDefault("todosOsDias", data.getOrDefault("allDays", "false")));
         String frequency = data.getOrDefault("vezesAoDia", data.getOrDefault("frequencyPerDay", "1"));
 
+        if (date == null || date.isBlank()) {
+            date = LocalDate.now().toString();
+        }
+
         return repository.saveItem(type, name, date, allDays, frequency);
+    }
+
+    public TaskDto toggleCompletion(String id, String type, String date) {
+        return repository.toggleCompletion(id, type, date);
+    }
+
+    public TaskDto findItemById(String id, String type) {
+        return repository.findItemById(id, type);
+    }
+
+    public Map<String, Integer> getDailyHeatmap() {
+        return repository.getDailyHeatmap();
     }
 }
