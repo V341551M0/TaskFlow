@@ -76,11 +76,12 @@ public class TaskRepository {
         }
 
         int contribution = parseFrequency(item.getFrequencyPerDay());
-        if (item.isCompletedToday()) {
+        String previousStatus = item.getStatus();
+        if ("completed".equalsIgnoreCase(previousStatus)) {
             item.setCompletedToday(false);
             item.setStatus("pending");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
-            dailyHeatmap.put(completionDate, Math.max(0, dailyHeatmap.getOrDefault(completionDate, 0) - contribution));
+            dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) - contribution);
         } else {
             item.setCompletedToday(true);
             item.setStatus("completed");
@@ -104,6 +105,7 @@ public class TaskRepository {
         int contribution = parseFrequency(item.getFrequencyPerDay());
         boolean completed = "completed".equalsIgnoreCase(status);
         boolean failed = "failed".equalsIgnoreCase(status);
+        String previousStatus = item.getStatus();
 
         if (completed) {
             item.setCompletedToday(true);
@@ -114,12 +116,16 @@ public class TaskRepository {
             item.setCompletedToday(false);
             item.setStatus("failed");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
-            dailyHeatmap.put(completionDate, Math.max(0, dailyHeatmap.getOrDefault(completionDate, 0) - contribution));
+            dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) - contribution);
         } else {
             item.setCompletedToday(false);
             item.setStatus("pending");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
-            dailyHeatmap.put(completionDate, Math.max(0, dailyHeatmap.getOrDefault(completionDate, 0) - contribution));
+            if ("completed".equalsIgnoreCase(previousStatus)) {
+                dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) - contribution);
+            } else if ("failed".equalsIgnoreCase(previousStatus)) {
+                dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) + contribution);
+            }
         }
 
         return item;

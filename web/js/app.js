@@ -425,8 +425,9 @@ function renderHeatmap(heatmap) {
     date.setDate(today.getDate() - index);
     const isoDate = formatIsoDate(date);
     const value = heatmap[isoDate] || 0;
-    const level = getHeatLevel(value);
-    cells.push(`<span class="day level-${level}" data-tooltip="${formatDateLabel(date)}: ${value} contribuições"></span>`);
+    const levelClass = getHeatClass(value);
+    const tooltip = getHeatTooltip(value, date);
+    cells.push(`<span class="day ${levelClass}" data-tooltip="${tooltip}"></span>`);
   }
 
   const weeks = [];
@@ -476,20 +477,25 @@ function sumValuesForMonth(heatmap, referenceDate) {
   return total;
 }
 
-function getHeatLevel(value) {
-  if (value <= 0) {
-    return 0;
+function getHeatClass(value) {
+  if (value > 0) {
+    return 'level-success';
   }
-  if (value <= 1) {
-    return 1;
+  if (value < 0) {
+    return 'level-failed';
   }
-  if (value <= 2) {
-    return 2;
+  return 'level-0';
+}
+
+function getHeatTooltip(value, date) {
+  const label = formatDateLabel(date);
+  if (value > 0) {
+    return `${label}: ${value} conclusão${value > 1 ? 's' : ''}`;
   }
-  if (value <= 4) {
-    return 3;
+  if (value < 0) {
+    return `${label}: ${Math.abs(value)} falha${Math.abs(value) > 1 ? 's' : ''}`;
   }
-  return 4;
+  return `${label}: sem atividade`;
 }
 
 function formatIsoDate(date) {
