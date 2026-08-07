@@ -1,11 +1,35 @@
-#intellij
-.idea
+# IntelliJ / VS Code
+.idea/
+.vscode/
+*.iml
+*.code-workspace
 
-.iml
-.target
-.log
+# Maven / Java
+target/
+out/
+build/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
 
-#vscode
-.vscode
+# Sistema operacional
 .DS_Store
 .Thumbs.db
+
+# Frontend / Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Arquivos temporários
+.tmp/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~

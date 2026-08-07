@@ -9,6 +9,7 @@ public class TaskDto {
     private String type;
     private boolean completedToday;
     private int completionCount;
+    private String status;
 
     public TaskDto() {
     }
@@ -22,6 +23,7 @@ public class TaskDto {
         this.type = type;
         this.completedToday = false;
         this.completionCount = 0;
+        this.status = "pending";
     }
 
     public String getId() {
@@ -86,5 +88,13 @@ public class TaskDto {
 
     public void setCompletionCount(int completionCount) {
         this.completionCount = completionCount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

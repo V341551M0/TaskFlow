@@ -78,13 +78,50 @@ public class TaskRepository {
         int contribution = parseFrequency(item.getFrequencyPerDay());
         if (item.isCompletedToday()) {
             item.setCompletedToday(false);
+            item.setStatus("pending");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
             dailyHeatmap.put(completionDate, Math.max(0, dailyHeatmap.getOrDefault(completionDate, 0) - contribution));
         } else {
             item.setCompletedToday(true);
+            item.setStatus("completed");
             item.setCompletionCount(item.getCompletionCount() + contribution);
             dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) + contribution);
         }
+        return item;
+    }
+
+    public TaskDto updateStatus(String id, String type, String date, String status) {
+        TaskDto item = findItemById(id, type);
+        if (item == null) {
+            return null;
+        }
+
+        String completionDate = (date == null || date.isBlank()) ? item.getDate() : date;
+        if (completionDate == null || completionDate.isBlank()) {
+            completionDate = LocalDate.now().toString();
+        }
+
+        int contribution = parseFrequency(item.getFrequencyPerDay());
+        boolean completed = "completed".equalsIgnoreCase(status);
+        boolean failed = "failed".equalsIgnoreCase(status);
+
+        if (completed) {
+            item.setCompletedToday(true);
+            item.setStatus("completed");
+            item.setCompletionCount(item.getCompletionCount() + contribution);
+            dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) + contribution);
+        } else if (failed) {
+            item.setCompletedToday(false);
+            item.setStatus("failed");
+            item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
+            dailyHeatmap.put(completionDate, Math.max(0, dailyHeatmap.getOrDefault(completionDate, 0) - contribution));
+        } else {
+            item.setCompletedToday(false);
+            item.setStatus("pending");
+            item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
+            dailyHeatmap.put(completionDate, Math.max(0, dailyHeatmap.getOrDefault(completionDate, 0) - contribution));
+        }
+
         return item;
     }
 

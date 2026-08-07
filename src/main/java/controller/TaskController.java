@@ -52,7 +52,13 @@ public class TaskController {
         if ("POST".equalsIgnoreCase(method)) {
             String body = readBody(exchange);
             Map<String, String> data = parseJsonBody(body);
-            TaskDto updated = taskService.toggleCompletion(data.get("id"), data.get("type"), data.get("date"));
+            String status = data.get("status");
+            TaskDto updated;
+            if (status != null && !status.isBlank()) {
+                updated = taskService.updateStatus(data.get("id"), data.get("type"), data.get("date"), status);
+            } else {
+                updated = taskService.toggleCompletion(data.get("id"), data.get("type"), data.get("date"));
+            }
             if (updated == null) {
                 sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
                 return;
@@ -213,7 +219,7 @@ public class TaskController {
             return builder.append("]").toString();
         }
         if (body instanceof TaskDto dto) {
-            return "{\"id\":\"" + escape(dto.getId()) + "\",\"name\":\"" + escape(dto.getName()) + "\",\"date\":\"" + escape(dto.getDate()) + "\",\"allDays\":" + dto.isAllDays() + ",\"frequencyPerDay\":\"" + escape(dto.getFrequencyPerDay()) + "\",\"type\":\"" + escape(dto.getType()) + "\",\"completedToday\":" + dto.isCompletedToday() + ",\"completionCount\":" + dto.getCompletionCount() + "}";
+            return "{\"id\":\"" + escape(dto.getId()) + "\",\"name\":\"" + escape(dto.getName()) + "\",\"date\":\"" + escape(dto.getDate()) + "\",\"allDays\":" + dto.isAllDays() + ",\"frequencyPerDay\":\"" + escape(dto.getFrequencyPerDay()) + "\",\"type\":\"" + escape(dto.getType()) + "\",\"completedToday\":" + dto.isCompletedToday() + ",\"completionCount\":" + dto.getCompletionCount() + ",\"status\":\"" + escape(dto.getStatus()) + "\"}";
         }
         return "\"\"";
     }

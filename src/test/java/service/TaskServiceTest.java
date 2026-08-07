@@ -49,4 +49,25 @@ public class TaskServiceTest {
         assertEquals(created.getId(), deleted.getId());
         assertTrue(service.listTasks().stream().noneMatch(item -> created.getId().equals(item.getId())));
     }
+
+    @Test
+    void shouldUpdateHeatmapWhenAnItemIsCompletedAndThenMarkedAsFailed() {
+        TaskService service = new TaskService();
+
+        TaskDto created = service.createItem("task", Map.of(
+                "nome", "Validar fluxo",
+                "data", "2026-08-07",
+                "todosOsDias", "false",
+                "vezesAoDia", "2"
+        ));
+
+        service.updateStatus(created.getId(), "task", "2026-08-07", "completed");
+        service.updateStatus(created.getId(), "task", "2026-08-07", "failed");
+
+        Map<String, Integer> heatmap = service.getDailyHeatmap();
+        assertEquals(0, heatmap.getOrDefault("2026-08-07", 0));
+
+        TaskDto updated = service.findItemById(created.getId(), "task");
+        assertEquals("failed", updated.getStatus());
+    }
 }

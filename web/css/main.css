@@ -300,6 +300,10 @@ body {
   border-color: var(--accent-green);
 }
 
+.item-card-failed {
+  border-color: #ff6b6b;
+}
+
 .item-card-pending {
   border-color: var(--border-color);
 }

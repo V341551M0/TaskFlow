@@ -151,22 +151,27 @@ function renderList(containerId, items) {
     return;
   }
 
-  container.innerHTML = items.map(item => `
-    <article class="item-card ${item.completedToday ? 'item-card-completed' : 'item-card-pending'}" data-item-id="${item.id}" data-item-type="${item.type || 'item'}">
-      <div>
-        <strong>${item.name}</strong>
-        <p>${item.date || 'Sem data'}</p>
-      </div>
-      <div class="item-actions">
-        <span class="item-badge">${item.type || 'item'}</span>
-        <div class="status-buttons">
-          <button class="status-btn ${item.completedToday ? 'active' : ''}" data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Concluído</button>
-          <button class="status-btn ${!item.completedToday ? 'active' : ''}" data-action="pending" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Não concluído</button>
-          <button class="status-btn delete-btn" data-action="delete" data-id="${item.id}" data-type="${item.type || 'item'}">Apagar</button>
+  container.innerHTML = items.map(item => {
+    const status = item.status || (item.completedToday ? 'completed' : 'pending');
+    const isCompleted = status === 'completed';
+    const isFailed = status === 'failed';
+    return `
+      <article class="item-card ${isCompleted ? 'item-card-completed' : isFailed ? 'item-card-failed' : 'item-card-pending'}" data-item-id="${item.id}" data-item-type="${item.type || 'item'}">
+        <div>
+          <strong>${item.name}</strong>
+          <p>${item.date || 'Sem data'}</p>
         </div>
-      </div>
-    </article>
-  `).join('');
+        <div class="item-actions">
+          <span class="item-badge">${item.type || 'item'}</span>
+          <div class="status-buttons">
+            <button class="status-btn ${isCompleted ? 'active' : ''}" data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Concluído</button>
+            <button class="status-btn ${isFailed ? 'active failed' : ''}" data-action="failed" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Falha</button>
+            <button class="status-btn delete-btn" data-action="delete" data-id="${item.id}" data-type="${item.type || 'item'}">Apagar</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
 
   document.querySelectorAll('.status-btn').forEach((button) => {
     if (button.dataset.action === 'delete') {
@@ -215,13 +220,13 @@ async function deleteItem(id, type) {
 }
 
 async function setItemStatus(id, type, date, action) {
-  const completed = action === 'complete';
+  const status = action === 'complete' ? 'completed' : action === 'failed' ? 'failed' : 'pending';
 
   try {
     const resposta = await fetch(`${API_BASE_URL}/api/complete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, type, date, completed })
+      body: JSON.stringify({ id, type, date, status })
     });
 
     if (resposta.ok) {
@@ -237,12 +242,13 @@ async function setItemStatus(id, type, date, action) {
   const list = localState[targetList] || [];
   const item = list.find((entry) => entry.id === id);
   if (item) {
-    item.completedToday = completed;
-    item.completionCount = item.completionCount || 0;
     const delta = Number(item.frequencyPerDay || 1);
-    if (completed) {
+    item.status = status;
+    item.completedToday = status === 'completed';
+    item.completionCount = item.completionCount || 0;
+    if (status === 'completed') {
       item.completionCount += delta;
-    } else {
+    } else if (status === 'failed' || status === 'pending') {
       item.completionCount = Math.max(0, item.completionCount - delta);
     }
   }
@@ -270,7 +276,8 @@ function createLocalItem(type, dados) {
     frequencyPerDay: dados.vezesAoDia || '1',
     type,
     completedToday: false,
-    completionCount: 0
+    completionCount: 0,
+    status: 'pending'
   };
 
   const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
@@ -316,19 +323,23 @@ function renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap)
   }
 
   if (completionRatioElement) {
-    const completed = allItems.filter((item) => item.completedToday).length;
+    const completed = allItems.filter((item) => (item.status || (item.completedToday ? 'completed' : 'pending')) === 'completed').length;
     const total = allItems.length;
     const ratioLabel = total > 0 ? `${completed}/${total}` : '0/0';
     completionRatioElement.textContent = ratioLabel;
   }
 
   if (summaryContainer) {
-    const summaryItems = allItems.slice(0, 5).map((item) => `
-      <div class="summary-item">
-        <span>${item.name}</span>
-        <small>${item.completedToday ? 'Concluída' : 'Pendente'}</small>
-      </div>
-    `).join('');
+    const summaryItems = allItems.slice(0, 5).map((item) => {
+      const status = item.status || (item.completedToday ? 'completed' : 'pending');
+      const label = status === 'completed' ? 'Concluída' : status === 'failed' ? 'Falha' : 'Pendente';
+      return `
+        <div class="summary-item">
+          <span>${item.name}</span>
+          <small>${label}</small>
+        </div>
+      `;
+    }).join('');
     summaryContainer.innerHTML = summaryItems || '<p class="empty-state">Nenhuma atividade registrada ainda.</p>';
   }
 
@@ -390,7 +401,7 @@ function renderDonut(items) {
     return;
   }
 
-  const completed = items.filter((item) => item.completedToday).length;
+  const completed = items.filter((item) => (item.status || (item.completedToday ? 'completed' : 'pending')) === 'completed').length;
   const total = items.length;
   const ratio = total > 0 ? completed / total : 0;
   const radius = 40;
