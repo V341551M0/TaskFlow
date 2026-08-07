@@ -152,7 +152,7 @@ function renderList(containerId, items) {
   }
 
   container.innerHTML = items.map(item => `
-    <article class="item-card ${item.completedToday ? 'item-card-completed' : 'item-card-pending'}">
+    <article class="item-card ${item.completedToday ? 'item-card-completed' : 'item-card-pending'}" data-item-id="${item.id}" data-item-type="${item.type || 'item'}">
       <div>
         <strong>${item.name}</strong>
         <p>${item.date || 'Sem data'}</p>
@@ -162,18 +162,56 @@ function renderList(containerId, items) {
         <div class="status-buttons">
           <button class="status-btn ${item.completedToday ? 'active' : ''}" data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Concluído</button>
           <button class="status-btn ${!item.completedToday ? 'active' : ''}" data-action="pending" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Não concluído</button>
+          <button class="status-btn delete-btn" data-action="delete" data-id="${item.id}" data-type="${item.type || 'item'}">Apagar</button>
         </div>
       </div>
     </article>
   `).join('');
 
   document.querySelectorAll('.status-btn').forEach((button) => {
+    if (button.dataset.action === 'delete') {
+      button.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        const target = event.currentTarget;
+        const confirmed = window.confirm('Deseja realmente apagar esta atividade?');
+        if (!confirmed) {
+          return;
+        }
+        await deleteItem(target.dataset.id, target.dataset.type);
+      });
+      return;
+    }
     button.addEventListener('click', async (event) => {
       event.stopPropagation();
       const target = event.currentTarget;
       await setItemStatus(target.dataset.id, target.dataset.type, target.dataset.date, target.dataset.action);
     });
   });
+}
+
+async function deleteItem(id, type) {
+  try {
+    const resposta = await fetch(`${API_BASE_URL}/api/delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, type })
+    });
+
+    if (resposta.ok) {
+      await loadItems();
+      return;
+    }
+  } catch (error) {
+    console.warn('API indisponível para exclusão, removendo localmente.', error);
+  }
+
+  const localState = loadLocalState();
+  const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
+  const list = localState[targetList] || [];
+  const updatedList = list.filter((entry) => entry.id !== id);
+  localState[targetList] = updatedList;
+  persistLocalState(localState);
+  await loadItems();
 }
 
 async function setItemStatus(id, type, date, action) {

@@ -43,6 +43,10 @@ public class TaskService {
         return repository.toggleCompletion(id, type, date);
     }
 
+    public TaskDto deleteItem(String id, String type) {
+        return repository.deleteItem(id, type);
+    }
+
     public TaskDto findItemById(String id, String type) {
         return repository.findItemById(id, type);
     }

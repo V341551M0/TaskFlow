@@ -50,6 +50,20 @@ public class TaskRepository {
         };
     }
 
+    public TaskDto deleteItem(String id, String type) {
+        TaskDto item = findItemById(id, type);
+        if (item == null) {
+            return null;
+        }
+
+        switch (type) {
+            case "habit" -> habits.remove(item);
+            case "recurring" -> recurringTasks.remove(item);
+            default -> tasks.remove(item);
+        }
+        return item;
+    }
+
     public TaskDto toggleCompletion(String id, String type, String date) {
         TaskDto item = findItemById(id, type);
         if (item == null) {

@@ -32,4 +32,21 @@ public class TaskServiceTest {
         TaskDto updated = service.findItemById(created.getId(), "habit");
         assertTrue(updated.isCompletedToday());
     }
+
+    @Test
+    void shouldDeleteItemFromTheCorrectList() {
+        TaskService service = new TaskService();
+
+        TaskDto created = service.createItem("task", Map.of(
+                "nome", "Remover depois",
+                "data", "2026-08-07",
+                "todosOsDias", "false",
+                "vezesAoDia", "1"
+        ));
+
+        TaskDto deleted = service.deleteItem(created.getId(), "task");
+
+        assertEquals(created.getId(), deleted.getId());
+        assertTrue(service.listTasks().stream().noneMatch(item -> created.getId().equals(item.getId())));
+    }
 }

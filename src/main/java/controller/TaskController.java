@@ -25,6 +25,7 @@ public class TaskController {
         server.createContext("/api/habits", this::handleHabits);
         server.createContext("/api/recurring-tasks", this::handleRecurringTasks);
         server.createContext("/api/complete", this::handleComplete);
+        server.createContext("/api/delete", this::handleDelete);
         server.createContext("/api/dashboard", this::handleDashboard);
         server.createContext("/api/heatmap", this::handleHeatmap);
     }
@@ -57,6 +58,28 @@ public class TaskController {
                 return;
             }
             sendJson(exchange, 200, updated);
+            return;
+        }
+
+        sendJson(exchange, 405, Map.of("message", "Method not allowed"));
+    }
+
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        String method = exchange.getRequestMethod();
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            sendCors(exchange, 204);
+            return;
+        }
+
+        if ("POST".equalsIgnoreCase(method)) {
+            String body = readBody(exchange);
+            Map<String, String> data = parseJsonBody(body);
+            TaskDto deleted = taskService.deleteItem(data.get("id"), data.get("type"));
+            if (deleted == null) {
+                sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+                return;
+            }
+            sendJson(exchange, 200, deleted);
             return;
         }
 
