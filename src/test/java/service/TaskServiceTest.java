@@ -70,4 +70,22 @@ public class TaskServiceTest {
         TaskDto updated = service.findItemById(created.getId(), "task");
         assertEquals("failed", updated.getStatus());
     }
+
+    @Test
+    void shouldRemoveHeatmapHistoryWhenItemIsDeleted() {
+        TaskService service = new TaskService();
+
+        TaskDto created = service.createItem("habit", Map.of(
+                "nome", "Remover histórico",
+                "data", "2026-08-07",
+                "todosOsDias", "false",
+                "vezesAoDia", "3"
+        ));
+
+        service.updateStatus(created.getId(), "habit", "2026-08-07", "completed");
+        service.deleteItem(created.getId(), "habit");
+
+        Map<String, Integer> heatmap = service.getDailyHeatmap();
+        assertEquals(0, heatmap.getOrDefault("2026-08-07", 0));
+    }
 }

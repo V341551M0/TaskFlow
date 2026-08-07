@@ -10,6 +10,7 @@ public class TaskDto {
     private boolean completedToday;
     private int completionCount;
     private String status;
+    private java.util.Map<String, Integer> history;
 
     public TaskDto() {
     }
@@ -24,6 +25,7 @@ public class TaskDto {
         this.completedToday = false;
         this.completionCount = 0;
         this.status = "pending";
+        this.history = new java.util.HashMap<>();
     }
 
     public String getId() {
@@ -96,5 +98,13 @@ public class TaskDto {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public java.util.Map<String, Integer> getHistory() {
+        return history;
+    }
+
+    public void setHistory(java.util.Map<String, Integer> history) {
+        this.history = history;
     }
 }
