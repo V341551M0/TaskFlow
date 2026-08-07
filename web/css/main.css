@@ -250,6 +250,42 @@ body {
   text-transform: capitalize;
 }
 
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status-buttons {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.status-btn {
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-primary);
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.status-btn.active {
+  background-color: var(--accent-green);
+  color: #07110a;
+  border-color: var(--accent-green);
+}
+
+.item-card-completed {
+  border-color: var(--accent-green);
+}
+
+.item-card-pending {
+  border-color: var(--border-color);
+}
+
 .empty-state {
   color: var(--text-secondary);
   font-size: 0.95rem;

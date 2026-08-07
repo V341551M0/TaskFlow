@@ -152,36 +152,38 @@ function renderList(containerId, items) {
   }
 
   container.innerHTML = items.map(item => `
-    <article class="item-card">
+    <article class="item-card ${item.completedToday ? 'item-card-completed' : 'item-card-pending'}">
       <div>
         <strong>${item.name}</strong>
         <p>${item.date || 'Sem data'}</p>
       </div>
       <div class="item-actions">
         <span class="item-badge">${item.type || 'item'}</span>
-        <label class="completion-toggle">
-          <input type="checkbox" class="completion-checkbox" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}" ${item.completedToday ? 'checked' : ''}>
-          <span>Marcar</span>
-        </label>
+        <div class="status-buttons">
+          <button class="status-btn ${item.completedToday ? 'active' : ''}" data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Concluído</button>
+          <button class="status-btn ${!item.completedToday ? 'active' : ''}" data-action="pending" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Não concluído</button>
+        </div>
       </div>
     </article>
   `).join('');
 
-  document.querySelectorAll('.completion-checkbox').forEach((checkbox) => {
-    checkbox.addEventListener('change', async (event) => {
+  document.querySelectorAll('.status-btn').forEach((button) => {
+    button.addEventListener('click', async (event) => {
       event.stopPropagation();
       const target = event.currentTarget;
-      await markItemAsCompleted(target.dataset.id, target.dataset.type, target.dataset.date);
+      await setItemStatus(target.dataset.id, target.dataset.type, target.dataset.date, target.dataset.action);
     });
   });
 }
 
-async function markItemAsCompleted(id, type, date) {
+async function setItemStatus(id, type, date, action) {
+  const completed = action === 'complete';
+
   try {
     const resposta = await fetch(`${API_BASE_URL}/api/complete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, type, date })
+      body: JSON.stringify({ id, type, date, completed })
     });
 
     if (resposta.ok) {
@@ -197,12 +199,13 @@ async function markItemAsCompleted(id, type, date) {
   const list = localState[targetList] || [];
   const item = list.find((entry) => entry.id === id);
   if (item) {
-    item.completedToday = !item.completedToday;
+    item.completedToday = completed;
     item.completionCount = item.completionCount || 0;
-    if (item.completedToday) {
-      item.completionCount += Number(item.frequencyPerDay || 1);
+    const delta = Number(item.frequencyPerDay || 1);
+    if (completed) {
+      item.completionCount += delta;
     } else {
-      item.completionCount = Math.max(0, item.completionCount - Number(item.frequencyPerDay || 1));
+      item.completionCount = Math.max(0, item.completionCount - delta);
     }
   }
   persistLocalState(localState);
