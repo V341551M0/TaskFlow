@@ -2,6 +2,7 @@
     Lógica da web e comunicação com o backend
 */
 const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'http://localhost:8080';
+const STORAGE_KEY = 'taskflow-state';
 
 document.addEventListener('DOMContentLoaded', function () {
   attachNavigation();
@@ -71,19 +72,31 @@ function attachCreateModal() {
 
       const pageType = window.location.pathname.includes('HabitTask') ? 'habit' : window.location.pathname.includes('RecurringTask') ? 'recurring' : 'task';
       const endpoint = `${API_BASE_URL}/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`;
-      const resposta = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dados)
-      });
+      try {
+        const resposta = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
 
-      if (resposta.ok) {
-        if (modal) {
-          modal.style.display = 'none';
+        if (resposta.ok) {
+          if (modal) {
+            modal.style.display = 'none';
+          }
+          form.reset();
+          loadItems();
+          return;
         }
-        form.reset();
-        loadItems();
+      } catch (error) {
+        console.warn('API indisponível, usando armazenamento local.', error);
       }
+
+      createLocalItem(pageType, dados);
+      if (modal) {
+        modal.style.display = 'none';
+      }
+      form.reset();
+      loadItems();
     });
   }
 }
@@ -102,17 +115,29 @@ async function loadItems() {
     const heatmap = dashboard.heatmap || {};
     const allItems = [...tasks, ...habits, ...recurringTasks];
 
-    renderList('dashboard-list', allItems);
-    renderList('task-list', tasks);
-    renderList('habit-list', habits);
-    renderList('recurring-list', recurringTasks);
-
-    updateMetrics(tasks, habits, recurringTasks);
-    renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap);
-    renderHeatmap(heatmap);
+    persistLocalState({ tasks, habits, recurringTasks, heatmap });
+    renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap);
   } catch (error) {
-    console.error('Erro ao carregar itens:', error);
+    console.warn('Usando dados locais do navegador.', error);
+    const localState = loadLocalState();
+    const tasks = localState.tasks || [];
+    const habits = localState.habits || [];
+    const recurringTasks = localState.recurringTasks || [];
+    const heatmap = localState.heatmap || {};
+    const allItems = [...tasks, ...habits, ...recurringTasks];
+    renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap);
   }
+}
+
+function renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap) {
+  renderList('dashboard-list', allItems);
+  renderList('task-list', tasks);
+  renderList('habit-list', habits);
+  renderList('recurring-list', recurringTasks);
+
+  updateMetrics(tasks, habits, recurringTasks);
+  renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap);
+  renderHeatmap(heatmap);
 }
 
 function renderList(containerId, items) {
@@ -161,10 +186,27 @@ async function markItemAsCompleted(id, type, date) {
 
     if (resposta.ok) {
       await loadItems();
+      return;
     }
   } catch (error) {
-    console.error('Erro ao atualizar atividade:', error);
+    console.warn('API indisponível para marcação, atualizando localmente.', error);
   }
+
+  const localState = loadLocalState();
+  const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
+  const list = localState[targetList] || [];
+  const item = list.find((entry) => entry.id === id);
+  if (item) {
+    item.completedToday = !item.completedToday;
+    item.completionCount = item.completionCount || 0;
+    if (item.completedToday) {
+      item.completionCount += Number(item.frequencyPerDay || 1);
+    } else {
+      item.completionCount = Math.max(0, item.completionCount - Number(item.frequencyPerDay || 1));
+    }
+  }
+  persistLocalState(localState);
+  await loadItems();
 }
 
 function updateMetrics(tasks, habits, recurringTasks) {
@@ -175,6 +217,46 @@ function updateMetrics(tasks, habits, recurringTasks) {
   if (taskCount) taskCount.textContent = `${tasks.length}/-`;
   if (habitCount) habitCount.textContent = `${habits.length}/-`;
   if (recurringCount) recurringCount.textContent = `${recurringTasks.length}/-`;
+}
+
+function createLocalItem(type, dados) {
+  const localState = loadLocalState();
+  const item = {
+    id: `local-${Date.now()}`,
+    name: dados.nome,
+    date: dados.data || new Date().toISOString().slice(0, 10),
+    allDays: Boolean(dados.todosOsDias),
+    frequencyPerDay: dados.vezesAoDia || '1',
+    type,
+    completedToday: false,
+    completionCount: 0
+  };
+
+  const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
+  localState[targetList] = localState[targetList] || [];
+  localState[targetList].push(item);
+  persistLocalState(localState);
+}
+
+function loadLocalState() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return { tasks: [], habits: [], recurringTasks: [], heatmap: {} };
+    }
+    return JSON.parse(stored);
+  } catch (error) {
+    console.warn('Não foi possível carregar o estado local.', error);
+    return { tasks: [], habits: [], recurringTasks: [], heatmap: {} };
+  }
+}
+
+function persistLocalState(state) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('Não foi possível persistir o estado local.', error);
+  }
 }
 
 function renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap) {
