@@ -88,4 +88,23 @@ public class TaskServiceTest {
         Map<String, Integer> heatmap = service.getDailyHeatmap();
         assertEquals(0, heatmap.getOrDefault("2026-08-07", 0));
     }
+
+    @Test
+    void shouldRemoveHeatmapHistoryWhenRecurringTaskIsDeletedAfterToggle() {
+        TaskService service = new TaskService();
+
+        TaskDto created = service.createItem("recurring", Map.of(
+                "nome", "Recorrente Teste",
+                "data", "2026-08-10",
+                "todosOsDias", "true",
+                "vezesAoDia", "2"
+        ));
+
+        service.toggleCompletion(created.getId(), "recurring", "2026-08-10");
+        assertEquals(2, service.getDailyHeatmap().get("2026-08-10"));
+
+        service.deleteItem(created.getId(), "recurring");
+        assertEquals(0, service.getDailyHeatmap().getOrDefault("2026-08-10", 0));
+        assertTrue(service.listRecurringTasks().stream().noneMatch(item -> created.getId().equals(item.getId())));
+    }
 }

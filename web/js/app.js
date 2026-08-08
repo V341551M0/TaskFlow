@@ -213,8 +213,38 @@ async function deleteItem(id, type) {
   const localState = loadLocalState();
   const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
   const list = localState[targetList] || [];
+  const item = list.find((entry) => entry.id === id);
   const updatedList = list.filter((entry) => entry.id !== id);
   localState[targetList] = updatedList;
+
+  if (item) {
+    localState.heatmap = localState.heatmap || {};
+    if (item.history && Object.keys(item.history).length > 0) {
+      Object.entries(item.history).forEach(([date, contribution]) => {
+        const current = Number(localState.heatmap[date] || 0);
+        const next = current - Number(contribution);
+        if (next <= 0) {
+          delete localState.heatmap[date];
+        } else {
+          localState.heatmap[date] = next;
+        }
+      });
+    } else {
+      const completionDate = item.date || new Date().toISOString().slice(0, 10);
+      const delta = Number(item.frequencyPerDay || 1);
+      const current = Number(localState.heatmap[completionDate] || 0);
+      if (item.status === 'completed' || item.completedToday) {
+        const next = current - delta;
+        if (next <= 0) delete localState.heatmap[completionDate];
+        else localState.heatmap[completionDate] = next;
+      } else if (item.status === 'failed') {
+        const next = current + delta;
+        if (next <= 0) delete localState.heatmap[completionDate];
+        else localState.heatmap[completionDate] = next;
+      }
+    }
+  }
+
   persistLocalState(localState);
   await loadItems();
 }
@@ -247,13 +277,20 @@ async function setItemStatus(id, type, date, action) {
     const completionDate = date || item.date || new Date().toISOString().slice(0, 10);
     const normalizedState = status === 'completed' ? 'completed' : status === 'failed' ? 'failed' : 'pending';
 
+    item.history = item.history || {};
+
     item.status = normalizedState;
     item.completedToday = normalizedState === 'completed';
     item.completionCount = item.completionCount || 0;
     if (normalizedState === 'completed') {
       item.completionCount += delta;
-    } else if (normalizedState === 'failed' || normalizedState === 'pending') {
+      item.history[completionDate] = delta;
+    } else if (normalizedState === 'failed') {
       item.completionCount = Math.max(0, item.completionCount - delta);
+      item.history[completionDate] = -delta;
+    } else {
+      item.completionCount = Math.max(0, item.completionCount - delta);
+      delete item.history[completionDate];
     }
 
     localState.heatmap = localState.heatmap || {};
@@ -268,7 +305,11 @@ async function setItemStatus(id, type, date, action) {
     } else if (previousStatus === 'failed') {
       nextValue = currentValue + delta;
     }
-    localState.heatmap[completionDate] = nextValue;
+    if (nextValue <= 0) {
+      delete localState.heatmap[completionDate];
+    } else {
+      localState.heatmap[completionDate] = nextValue;
+    }
   }
   persistLocalState(localState);
   await loadItems();

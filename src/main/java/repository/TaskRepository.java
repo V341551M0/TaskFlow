@@ -43,6 +43,13 @@ public class TaskRepository {
     }
 
     public TaskDto findItemById(String id, String type) {
+        if (type == null || type.isBlank()) {
+            TaskDto item = findById(tasks, id);
+            if (item != null) return item;
+            item = findById(habits, id);
+            if (item != null) return item;
+            return findById(recurringTasks, id);
+        }
         return switch (type) {
             case "habit" -> findById(habits, id);
             case "recurring" -> findById(recurringTasks, id);
@@ -56,17 +63,41 @@ public class TaskRepository {
             return null;
         }
 
-        item.getHistory().forEach((date, contribution) -> {
-            int current = dailyHeatmap.getOrDefault(date, 0);
-            int next = current - contribution;
-            if (next <= 0) {
-                dailyHeatmap.remove(date);
-            } else {
-                dailyHeatmap.put(date, next);
+        if (item.getHistory() != null && !item.getHistory().isEmpty()) {
+            item.getHistory().forEach((date, contribution) -> {
+                int current = dailyHeatmap.getOrDefault(date, 0);
+                int next = current - contribution;
+                if (next <= 0) {
+                    dailyHeatmap.remove(date);
+                } else {
+                    dailyHeatmap.put(date, next);
+                }
+            });
+            item.getHistory().clear();
+        } else {
+            String completionDate = (item.getDate() == null || item.getDate().isBlank()) ? LocalDate.now().toString() : item.getDate();
+            int contribution = parseFrequency(item.getFrequencyPerDay());
+            if ("completed".equalsIgnoreCase(item.getStatus()) || item.isCompletedToday()) {
+                int current = dailyHeatmap.getOrDefault(completionDate, 0);
+                int next = current - contribution;
+                if (next <= 0) {
+                    dailyHeatmap.remove(completionDate);
+                } else {
+                    dailyHeatmap.put(completionDate, next);
+                }
+            } else if ("failed".equalsIgnoreCase(item.getStatus())) {
+                int current = dailyHeatmap.getOrDefault(completionDate, 0);
+                int next = current + contribution;
+                if (next <= 0) {
+                    dailyHeatmap.remove(completionDate);
+                } else {
+                    dailyHeatmap.put(completionDate, next);
+                }
             }
-        });
+        }
 
-        switch (type) {
+        String resolvedType = type != null && !type.isBlank() ? type : item.getType();
+        switch (resolvedType != null ? resolvedType : "") {
             case "habit" -> habits.remove(item);
             case "recurring" -> recurringTasks.remove(item);
             default -> tasks.remove(item);
@@ -91,11 +122,18 @@ public class TaskRepository {
             item.setCompletedToday(false);
             item.setStatus("pending");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
-            dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) - contribution);
+            item.getHistory().remove(completionDate);
+            int next = dailyHeatmap.getOrDefault(completionDate, 0) - contribution;
+            if (next <= 0) {
+                dailyHeatmap.remove(completionDate);
+            } else {
+                dailyHeatmap.put(completionDate, next);
+            }
         } else {
             item.setCompletedToday(true);
             item.setStatus("completed");
             item.setCompletionCount(item.getCompletionCount() + contribution);
+            item.getHistory().put(completionDate, contribution);
             dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) + contribution);
         }
         return item;
@@ -128,17 +166,32 @@ public class TaskRepository {
             item.setStatus("failed");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
             item.getHistory().put(completionDate, -contribution);
-            dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) - contribution);
+            int next = dailyHeatmap.getOrDefault(completionDate, 0) - contribution;
+            if (next <= 0) {
+                dailyHeatmap.remove(completionDate);
+            } else {
+                dailyHeatmap.put(completionDate, next);
+            }
         } else {
             item.setCompletedToday(false);
             item.setStatus("pending");
             item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
             if ("completed".equalsIgnoreCase(previousStatus)) {
                 item.getHistory().remove(completionDate);
-                dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) - contribution);
+                int next = dailyHeatmap.getOrDefault(completionDate, 0) - contribution;
+                if (next <= 0) {
+                    dailyHeatmap.remove(completionDate);
+                } else {
+                    dailyHeatmap.put(completionDate, next);
+                }
             } else if ("failed".equalsIgnoreCase(previousStatus)) {
                 item.getHistory().remove(completionDate);
-                dailyHeatmap.put(completionDate, dailyHeatmap.getOrDefault(completionDate, 0) + contribution);
+                int next = dailyHeatmap.getOrDefault(completionDate, 0) + contribution;
+                if (next <= 0) {
+                    dailyHeatmap.remove(completionDate);
+                } else {
+                    dailyHeatmap.put(completionDate, next);
+                }
             }
         }
 
