@@ -13,7 +13,9 @@ public class TaskRepository {
     private final List<TaskDto> tasks = new ArrayList<>();
     private final List<TaskDto> habits = new ArrayList<>();
     private final List<TaskDto> recurringTasks = new ArrayList<>();
-    private final Map<String, Integer> dailyHeatmap = new HashMap<>();
+    private final Map<String, Integer> taskHeatmap = new HashMap<>();
+    private final Map<String, Integer> habitHeatmap = new HashMap<>();
+    private final Map<String, Integer> recurringHeatmap = new HashMap<>();
 
     public TaskRepository() {
         seedData();
