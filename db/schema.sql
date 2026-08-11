@@ -1,3 +1,7 @@
+/*
+    Estrutura do Banco De Dados
+*/
+
 CREATE TABLE task (
     id INT NOT NULL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
