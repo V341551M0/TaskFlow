@@ -1,4 +1,5 @@
 # IntelliJ / VS Code
+.venv
 .idea/
 .vscode/
 *.iml

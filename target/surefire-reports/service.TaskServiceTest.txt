@@ -1,4 +1,189 @@
 -------------------------------------------------------------------------------
 Test set: service.TaskServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in service.TaskServiceTest
+Tests run: 5, Failures: 0, Errors: 5, Skipped: 0, Time elapsed: 0.055 s <<< FAILURE! -- in service.TaskServiceTest
+service.TaskServiceTest.shouldRemoveHeatmapHistoryWhenItemIsDeleted -- Time elapsed: 0.021 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved to a variable
+
+	at repository.TaskRepository.<init>(TaskRepository.java:70)
+	at service.TaskService.<init>(TaskService.java:14)
+	at service.TaskServiceTest.shouldRemoveHeatmapHistoryWhenItemIsDeleted(TaskServiceTest.java:76)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+service.TaskServiceTest.shouldUpdateHeatmapWhenAnItemIsCompletedAndThenMarkedAsFailed -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved to a variable
+
+	at repository.TaskRepository.<init>(TaskRepository.java:70)
+	at service.TaskService.<init>(TaskService.java:14)
+	at service.TaskServiceTest.shouldUpdateHeatmapWhenAnItemIsCompletedAndThenMarkedAsFailed(TaskServiceTest.java:55)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+service.TaskServiceTest.shouldDeleteItemFromTheCorrectList -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved to a variable
+
+	at repository.TaskRepository.<init>(TaskRepository.java:70)
+	at service.TaskService.<init>(TaskService.java:14)
+	at service.TaskServiceTest.shouldDeleteItemFromTheCorrectList(TaskServiceTest.java:38)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+service.TaskServiceTest.shouldRemoveHeatmapHistoryWhenRecurringTaskIsDeletedAfterToggle -- Time elapsed: 0.002 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved to a variable
+
+	at repository.TaskRepository.<init>(TaskRepository.java:70)
+	at service.TaskService.<init>(TaskService.java:14)
+	at service.TaskServiceTest.shouldRemoveHeatmapHistoryWhenRecurringTaskIsDeletedAfterToggle(TaskServiceTest.java:94)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+service.TaskServiceTest.shouldCreateItemAndUpdateDailyHeatmapWhenCompleted -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.Error: 
+Unresolved compilation problems: 
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved
+	dailyHeatmap cannot be resolved to a variable
+
+	at repository.TaskRepository.<init>(TaskRepository.java:70)
+	at service.TaskService.<init>(TaskService.java:14)
+	at service.TaskServiceTest.shouldCreateItemAndUpdateDailyHeatmapWhenCompleted(TaskServiceTest.java:15)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
