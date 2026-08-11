@@ -6,6 +6,7 @@
 /home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Note.java
 /home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Habit.java
 /home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Category.java
+/home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/util/DatabaseConnection.java
 /home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/Activity.java
 /home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/service/TaskService.java
 /home/verissimo/JAVA PROJECTS/TaskFlow/src/main/java/model/TaskModel.java

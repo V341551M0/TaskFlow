@@ -19,6 +19,7 @@ hs_err_pid*
 # Sistema operacional
 .DS_Store
 .Thumbs.db
+db/taskflow.db
 
 # Frontend / Node
 node_modules/
