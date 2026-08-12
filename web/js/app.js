@@ -10,68 +10,117 @@ document.addEventListener('DOMContentLoaded', function () {
   loadItems();
 });
 
-function attachNavigation() {
-  const botoes = document.querySelectorAll('.nav-buttons button');
+window.openTaskModal = function () {
+  const modal = document.getElementById('modal-task');
+  if (modal) {
+    modal.style.display = 'flex';
+  }
+};
 
-  botoes.forEach(function (botao) {
-    const texto = botao.textContent.trim();
-    if (texto === 'Hábitos') {
-      botao.addEventListener('click', function () {
-        window.location.href = 'pages/HabitTask.html'; 
-      });
-    } else if (texto === 'Tarefas') {
-      botao.addEventListener('click', function () {
-        window.location.href = 'pages/Task.html';
-      });
-    } else if (texto === 'Tarefas Recorrentes') {
-      botao.addEventListener('click', function () {
-        window.location.href = 'pages/RecurringTask.html';
-      });
-    } else if (texto.includes('Voltar para Pagina Inicial') || texto.includes('Voltar para Página Inicial')) {
-      botao.addEventListener('click', function () {
-        window.location.href = '../index.html';
-      });
-    }
+window.closeTaskModal = function () {
+  const modal = document.getElementById('modal-task');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+};
+
+function attachNavigation() {
+  const elements = document.querySelectorAll('.nav-buttons button, .nav-buttons a');
+  const isSubpage = window.location.pathname.includes('/pages/') || 
+                    window.location.pathname.endsWith('Task.html') || 
+                    window.location.pathname.endsWith('HabitTask.html') || 
+                    window.location.pathname.endsWith('RecurringTask.html');
+  const pagesPrefix = isSubpage ? '' : 'pages/';
+  const homePrefix = isSubpage ? '../' : './';
+
+  elements.forEach(function (element) {
+    element.addEventListener('click', function (event) {
+      const texto = element.textContent.trim().toLowerCase();
+      let targetUrl = null;
+
+      // Não interceptar botões de criação de atividades (ex: "Criar Novo Hábito")
+      if (texto.startsWith('criar')) {
+        return;
+      }
+
+      if (texto.includes('voltar') || texto.includes('pagina inicial') || texto.includes('página inicial')) {
+        targetUrl = homePrefix + 'index.html';
+      } else if (texto === 'tarefas recorrentes') {
+        targetUrl = pagesPrefix + 'RecurringTask.html';
+      } else if (texto === 'hábitos' || texto === 'habitos') {
+        targetUrl = pagesPrefix + 'HabitTask.html';
+      } else if (texto === 'tarefas') {
+        targetUrl = pagesPrefix + 'Task.html';
+      }
+
+      if (targetUrl) {
+        event.preventDefault();
+        window.location.href = targetUrl;
+      }
+    });
   });
 }
 
 function attachCreateModal() {
-  const createButton = document.querySelector('.new-class-button button');
+  const createButtons = document.querySelectorAll('#btn-nova-tarefa, #btn-novo-habito, #btn-nova-recorrente, .new-class-button button, .new-class-button a, .add-task-btn, [data-action="open-modal"]');
   const modal = document.getElementById('modal-task');
-  const closeButtons = document.querySelectorAll('.close-btn, .cose-btn');
+  const closeButtons = document.querySelectorAll('.close-btn, .cose-btn, .modal-close');
   const form = document.getElementById('form-task');
 
-  if (createButton && modal) {
-    createButton.addEventListener('click', () => {
-      modal.style.display = 'flex';
-    });
-  }
-
-  closeButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      if (modal) {
-        modal.style.display = 'none';
-      }
+  createButtons.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openTaskModal();
     });
   });
+
+  closeButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeTaskModal();
+    });
+  });
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeTaskModal();
+      }
+    });
+  }
 
   if (form) {
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
-      const dados = {
-        nome: document.getElementById('nome').value.trim(),
-        data: document.getElementById('data').value,
-        todosOsDias: document.getElementById('diario').checked,
-        vezesAoDia: document.getElementById('vezes-dia').value
-      };
+      const nomeInput = document.getElementById('nome');
+      const dataInput = document.getElementById('data');
+      const diarioInput = document.getElementById('diario');
+      const vezesDiaInput = document.getElementById('vezes-dia');
 
-      if (!dados.nome) {
+      const nome = nomeInput ? nomeInput.value.trim() : '';
+      const dataVal = dataInput ? dataInput.value : '';
+      const diario = diarioInput ? diarioInput.checked : false;
+      const vezesDia = vezesDiaInput ? vezesDiaInput.value : '1';
+
+      if (!nome) {
+        alert('Por favor, preencha o nome da atividade.');
         return;
       }
 
-      const pageType = window.location.pathname.includes('HabitTask') ? 'habit' : window.location.pathname.includes('RecurringTask') ? 'recurring' : 'task';
+      const dados = {
+        nome: nome,
+        data: dataVal,
+        todosOsDias: String(diario),
+        vezesAoDia: String(vezesDia)
+      };
+
+      const path = window.location.pathname;
+      const pageType = path.includes('HabitTask') ? 'habit' : path.includes('RecurringTask') ? 'recurring' : 'task';
       const endpoint = `${API_BASE_URL}/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`;
+
       try {
         const resposta = await fetch(endpoint, {
           method: 'POST',
@@ -80,23 +129,18 @@ function attachCreateModal() {
         });
 
         if (resposta.ok) {
-          if (modal) {
-            modal.style.display = 'none';
-          }
+          closeTaskModal();
           form.reset();
-          loadItems();
+          await loadItems();
           return;
+        } else {
+          const err = await resposta.json().catch(() => ({}));
+          alert(err.message || 'Erro ao criar atividade no backend Java MySQL.');
         }
       } catch (error) {
-        console.warn('API indisponível, usando armazenamento local.', error);
+        console.warn('Não foi possível conectar ao servidor backend Java:', error);
+        alert('Erro de comunicação com o servidor backend Java MySQL.');
       }
-
-      createLocalItem(pageType, dados);
-      if (modal) {
-        modal.style.display = 'none';
-      }
-      form.reset();
-      loadItems();
     });
   }
 }

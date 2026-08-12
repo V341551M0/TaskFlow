@@ -12,18 +12,20 @@
         <div class="container-buttons">
             <!-- Botões de Navegação -->
             <nav class="nav-buttons">
-                <button>Voltar para Pagina Inicial</button>
+                <a href="../index.html">
+                    <button type="button">Voltar para Página Inicial</button>
+                </a>
             </nav>
             <!--Botões de Criação-->
             <nav class="new-class-button">
-                <button>Criar Novo Habito</button>
+                <button>Criar Novo Hábito</button>
             </nav>
         </div>
         
         <!-- Modal (janela de criação) -->
         <div id="modal-task" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="close-btn">&times;</span>
+                <span class="close-btn" onclick="closeTaskModal()">&times;</span>
                 <h2>Criar Hábito</h2>
                 <p class="modal-subtitle">Cadastre um novo hábito e acompanhe sua evolução no calor do mês.</p>
     

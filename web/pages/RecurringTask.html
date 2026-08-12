@@ -12,11 +12,13 @@
         <div class="container-buttons">
             <!-- Botões de Navegação -->
             <nav class="nav-buttons">
-                <button>Voltar para Pagina Inicial</button>
+                <a href="../index.html">
+                    <button type="button">Voltar para Página Inicial</button>
+                </a>
             </nav>
             <!--Botões de Criação-->
             <nav class="new-class-button">
-                <button>Criar nova Tarefa Recorrente</button>
+                <button type="button" id="btn-nova-recorrente" onclick="openTaskModal()">Criar nova Tarefa Recorrente</button>
             </nav>
         </div>
 
@@ -45,7 +47,7 @@
         <!-- Modal (janela de criação)-->
          <div id="modal-task" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="cose-btn">&times;</span>
+                <span class="cose-btn" onclick="closeTaskModal()">&times;</span>
                 <h2>Criar Tarefa Recorrente</h2>
                 <p class="modal-subtitle">Defina uma tarefa recorrente e acompanhe o desempenho no mapa de calor.</p>
 
