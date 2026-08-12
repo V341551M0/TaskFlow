@@ -17,7 +17,7 @@ function attachNavigation() {
     const texto = botao.textContent.trim();
     if (texto === 'Hábitos') {
       botao.addEventListener('click', function () {
-        window.location.href = 'pages/HabitTask.html';
+        window.location.href = 'pages/HabitTask.html'; 
       });
     } else if (texto === 'Tarefas') {
       botao.addEventListener('click', function () {
