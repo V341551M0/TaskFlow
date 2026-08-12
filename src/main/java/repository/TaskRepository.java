@@ -54,7 +54,7 @@ public class TaskRepository {
             bindItem(statement, dto);
             statement.executeUpdate();
         } catch (SQLException ex) {
-            throw new IllegalStateException("Não foi possível salvar o item", ex);
+            throw new IllegalStateException("Não foi possível salvar o item no banco de dados", ex);
         }
 
         return dto;
@@ -106,7 +106,7 @@ public class TaskRepository {
             statement.setString(1, item.getId());
             statement.executeUpdate();
         } catch (SQLException ex) {
-            throw new IllegalStateException("Não foi possível excluir o item", ex);
+            throw new IllegalStateException("Não foi possível excluir o item do banco de dados", ex);
         }
 
         return item;
@@ -118,28 +118,25 @@ public class TaskRepository {
             return null;
         }
 
+        String currentStatus = item.getStatus();
+        if ("completed".equalsIgnoreCase(currentStatus) || "failed".equalsIgnoreCase(currentStatus)) {
+            throw new IllegalStateException("Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.");
+        }
+
         String completionDate = (date == null || date.isBlank()) ? item.getDate() : date;
         if (completionDate == null || completionDate.isBlank()) {
             completionDate = LocalDate.now().toString();
         }
 
         int contribution = parseFrequency(item.getFrequencyPerDay());
-        String previousStatus = item.getStatus();
-        if ("completed".equalsIgnoreCase(previousStatus)) {
-            item.setCompletedToday(false);
-            item.setStatus("pending");
-            item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
-            removeHistoryEntry(item.getId(), item.getType(), completionDate);
-            adjustHeatmap(completionDate, -contribution);
-        } else {
-            item.setCompletedToday(true);
-            item.setStatus("completed");
-            item.setCompletionCount(item.getCompletionCount() + contribution);
-            upsertHistoryEntry(item.getId(), item.getType(), completionDate, contribution);
-            adjustHeatmap(completionDate, contribution);
-        }
+        item.setCompletedToday(true);
+        item.setStatus("completed");
+        item.setCompletionCount(item.getCompletionCount() + contribution);
 
+        upsertHistoryEntry(item.getId(), item.getType(), completionDate, contribution);
+        adjustHeatmap(completionDate, contribution);
         persistItem(item);
+
         return item;
     }
 
@@ -147,6 +144,14 @@ public class TaskRepository {
         TaskDto item = findItemById(id, type);
         if (item == null) {
             return null;
+        }
+
+        String currentStatus = item.getStatus();
+        if ("completed".equalsIgnoreCase(currentStatus) || "failed".equalsIgnoreCase(currentStatus)) {
+            if (currentStatus.equalsIgnoreCase(status)) {
+                return item;
+            }
+            throw new IllegalStateException("Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.");
         }
 
         String completionDate = (date == null || date.isBlank()) ? item.getDate() : date;
@@ -157,7 +162,6 @@ public class TaskRepository {
         int contribution = parseFrequency(item.getFrequencyPerDay());
         boolean completed = "completed".equalsIgnoreCase(status);
         boolean failed = "failed".equalsIgnoreCase(status);
-        String previousStatus = item.getStatus();
 
         if (completed) {
             item.setCompletedToday(true);
@@ -174,14 +178,6 @@ public class TaskRepository {
         } else {
             item.setCompletedToday(false);
             item.setStatus("pending");
-            item.setCompletionCount(Math.max(0, item.getCompletionCount() - contribution));
-            if ("completed".equalsIgnoreCase(previousStatus)) {
-                removeHistoryEntry(item.getId(), item.getType(), completionDate);
-                adjustHeatmap(completionDate, -contribution);
-            } else if ("failed".equalsIgnoreCase(previousStatus)) {
-                removeHistoryEntry(item.getId(), item.getType(), completionDate);
-                adjustHeatmap(completionDate, contribution);
-            }
         }
 
         persistItem(item);
@@ -290,7 +286,7 @@ public class TaskRepository {
         String sql = """
                 INSERT INTO item_history (item_id, item_type, date, contribution)
                 VALUES (?, ?, ?, ?)
-                ON CONFLICT(item_id, date) DO UPDATE SET contribution = excluded.contribution
+                ON DUPLICATE KEY UPDATE contribution = VALUES(contribution)
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();
@@ -302,20 +298,6 @@ public class TaskRepository {
             statement.executeUpdate();
         } catch (SQLException ex) {
             throw new IllegalStateException("Não foi possível salvar o histórico", ex);
-        }
-    }
-
-    private void removeHistoryEntry(String itemId, String type, String date) {
-        String sql = "DELETE FROM item_history WHERE item_id = ? AND item_type = ? AND date = ?";
-
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, itemId);
-            statement.setString(2, type);
-            statement.setString(3, date);
-            statement.executeUpdate();
-        } catch (SQLException ex) {
-            throw new IllegalStateException("Não foi possível remover o histórico", ex);
         }
     }
 
@@ -350,7 +332,7 @@ public class TaskRepository {
         String upsertSql = """
                 INSERT INTO daily_heatmap (date, value)
                 VALUES (?, ?)
-                ON CONFLICT(date) DO UPDATE SET value = excluded.value
+                ON DUPLICATE KEY UPDATE value = VALUES(value)
                 """;
 
         try (Connection connection = DatabaseConnection.getConnection();

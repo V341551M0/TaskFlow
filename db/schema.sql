@@ -1,49 +1,49 @@
 /*
-    Estrutura do Banco De Dados
+    Estrutura do Banco De Dados (MySQL)
 */
 
 CREATE TABLE IF NOT EXISTS task (
-    id TEXT NOT NULL PRIMARY KEY,
-    nome TEXT NOT NULL,
-    data TEXT,
-    todos_os_dias INTEGER NOT NULL DEFAULT 0,
-    vezes_ao_dia TEXT NOT NULL DEFAULT '1',
-    completed_today INTEGER NOT NULL DEFAULT 0,
-    completion_count INTEGER NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'pending'
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    data VARCHAR(64),
+    todos_os_dias TINYINT(1) NOT NULL DEFAULT 0,
+    vezes_ao_dia VARCHAR(64) NOT NULL DEFAULT '1',
+    completed_today TINYINT(1) NOT NULL DEFAULT 0,
+    completion_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(64) NOT NULL DEFAULT 'pending'
 );
 
 CREATE TABLE IF NOT EXISTS habit (
-    id TEXT NOT NULL PRIMARY KEY,
-    nome TEXT NOT NULL,
-    data TEXT,
-    todos_os_dias INTEGER NOT NULL DEFAULT 0,
-    vezes_ao_dia TEXT NOT NULL DEFAULT '1',
-    completed_today INTEGER NOT NULL DEFAULT 0,
-    completion_count INTEGER NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'pending'
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    data VARCHAR(64),
+    todos_os_dias TINYINT(1) NOT NULL DEFAULT 0,
+    vezes_ao_dia VARCHAR(64) NOT NULL DEFAULT '1',
+    completed_today TINYINT(1) NOT NULL DEFAULT 0,
+    completion_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(64) NOT NULL DEFAULT 'pending'
 );
 
 CREATE TABLE IF NOT EXISTS recurring_task (
-    id TEXT NOT NULL PRIMARY KEY,
-    nome TEXT NOT NULL,
-    data TEXT,
-    todos_os_dias INTEGER NOT NULL DEFAULT 0,
-    vezes_ao_dia TEXT NOT NULL DEFAULT '1',
-    completed_today INTEGER NOT NULL DEFAULT 0,
-    completion_count INTEGER NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'pending'
+    id VARCHAR(64) NOT NULL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    data VARCHAR(64),
+    todos_os_dias TINYINT(1) NOT NULL DEFAULT 0,
+    vezes_ao_dia VARCHAR(64) NOT NULL DEFAULT '1',
+    completed_today TINYINT(1) NOT NULL DEFAULT 0,
+    completion_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(64) NOT NULL DEFAULT 'pending'
 );
 
 CREATE TABLE IF NOT EXISTS item_history (
-    item_id TEXT NOT NULL,
-    item_type TEXT NOT NULL,
-    date TEXT NOT NULL,
-    contribution INTEGER NOT NULL,
+    item_id VARCHAR(64) NOT NULL,
+    item_type VARCHAR(64) NOT NULL,
+    date VARCHAR(64) NOT NULL,
+    contribution INT NOT NULL,
     PRIMARY KEY (item_id, date)
 );
 
 CREATE TABLE IF NOT EXISTS daily_heatmap (
-    date TEXT NOT NULL PRIMARY KEY,
-    value INTEGER NOT NULL DEFAULT 0
+    date VARCHAR(64) NOT NULL PRIMARY KEY,
+    value INT NOT NULL DEFAULT 0
 );

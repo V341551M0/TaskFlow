@@ -3,6 +3,7 @@ package service;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +52,7 @@ public class TaskServiceTest {
     }
 
     @Test
-    void shouldUpdateHeatmapWhenAnItemIsCompletedAndThenMarkedAsFailed() {
+    void shouldPreventStatusChangeWhenAlreadyFinalized() {
         TaskService service = new TaskService();
 
         TaskDto created = service.createItem("task", Map.of(
@@ -62,13 +63,14 @@ public class TaskServiceTest {
         ));
 
         service.updateStatus(created.getId(), "task", "2026-08-07", "completed");
-        service.updateStatus(created.getId(), "task", "2026-08-07", "failed");
-
-        Map<String, Integer> heatmap = service.getDailyHeatmap();
-        assertEquals(0, heatmap.getOrDefault("2026-08-07", 0));
 
         TaskDto updated = service.findItemById(created.getId(), "task");
-        assertEquals("failed", updated.getStatus());
+        assertEquals("completed", updated.getStatus());
+
+        // Tentativa de alterar status de item já concluído deve lançar IllegalStateException
+        assertThrows(IllegalStateException.class, () -> {
+            service.updateStatus(created.getId(), "task", "2026-08-07", "failed");
+        });
     }
 
     @Test

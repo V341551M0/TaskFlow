@@ -2,11 +2,15 @@ model/Habit.class
 repository/TaskRepository.class
 service/TaskService.class
 model/History.class
+util/DatabaseConnection.class
 exceptions/TaskExceptions.class
 dto/TaskDto.class
 app/TaskApplication.class
 model/TaskModel.class
+model/Activity.class
 controller/TaskController.class
 model/Note.class
 util/TaskUtil.class
 model/Category.class
+model/Task.class
+model/RecurringTask.class

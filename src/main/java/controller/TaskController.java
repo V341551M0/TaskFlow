@@ -54,17 +54,22 @@ public class TaskController {
             Map<String, String> data = parseJsonBody(body);
             String status = data.get("status");
             TaskDto updated;
-            if (status != null && !status.isBlank()) {
-                updated = taskService.updateStatus(data.get("id"), data.get("type"), data.get("date"), status);
-            } else {
-                updated = taskService.toggleCompletion(data.get("id"), data.get("type"), data.get("date"));
-            }
-            if (updated == null) {
-                sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+            try {
+                if (status != null && !status.isBlank()) {
+                    updated = taskService.updateStatus(data.get("id"), data.get("type"), data.get("date"), status);
+                } else {
+                    updated = taskService.toggleCompletion(data.get("id"), data.get("type"), data.get("date"));
+                }
+                if (updated == null) {
+                    sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+                    return;
+                }
+                sendJson(exchange, 200, updated);
+                return;
+            } catch (IllegalStateException ex) {
+                sendJson(exchange, 400, Map.of("message", ex.getMessage()));
                 return;
             }
-            sendJson(exchange, 200, updated);
-            return;
         }
 
         sendJson(exchange, 405, Map.of("message", "Method not allowed"));

@@ -155,6 +155,7 @@ function renderList(containerId, items) {
     const status = item.status || (item.completedToday ? 'completed' : 'pending');
     const isCompleted = status === 'completed';
     const isFailed = status === 'failed';
+    const isFinalized = isCompleted || isFailed;
     return `
       <article class="item-card ${isCompleted ? 'item-card-completed' : isFailed ? 'item-card-failed' : 'item-card-pending'}" data-item-id="${item.id}" data-item-type="${item.type || 'item'}">
         <div>
@@ -164,8 +165,8 @@ function renderList(containerId, items) {
         <div class="item-actions">
           <span class="item-badge">${item.type || 'item'}</span>
           <div class="status-buttons">
-            <button class="status-btn ${isCompleted ? 'active' : ''}" data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Concluído</button>
-            <button class="status-btn ${isFailed ? 'active failed' : ''}" data-action="failed" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">Falha</button>
+            <button class="status-btn ${isCompleted ? 'active' : ''}" ${isFinalized ? 'disabled title="Status finalizado"' : ''} data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">${isCompleted ? 'Concluído' : 'Concluir'}</button>
+            <button class="status-btn ${isFailed ? 'active failed' : ''}" ${isFinalized ? 'disabled title="Status finalizado"' : ''} data-action="failed" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">${isFailed ? 'Falhou' : 'Falha'}</button>
             <button class="status-btn delete-btn" data-action="delete" data-id="${item.id}" data-type="${item.type || 'item'}">Apagar</button>
           </div>
         </div>
@@ -189,6 +190,10 @@ function renderList(containerId, items) {
     button.addEventListener('click', async (event) => {
       event.stopPropagation();
       const target = event.currentTarget;
+      if (target.disabled) {
+        alert('Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.');
+        return;
+      }
       await setItemStatus(target.dataset.id, target.dataset.type, target.dataset.date, target.dataset.action);
     });
   });
@@ -262,6 +267,12 @@ async function setItemStatus(id, type, date, action) {
     if (resposta.ok) {
       await loadItems();
       return;
+    } else {
+      const errData = await resposta.json().catch(() => ({}));
+      if (errData.message) {
+        alert(errData.message);
+        return;
+      }
     }
   } catch (error) {
     console.warn('API indisponível para marcação, atualizando localmente.', error);
@@ -272,6 +283,11 @@ async function setItemStatus(id, type, date, action) {
   const list = localState[targetList] || [];
   const item = list.find((entry) => entry.id === id);
   if (item) {
+    const previousStatus = item.status || (item.completedToday ? 'completed' : 'pending');
+    if (previousStatus === 'completed' || previousStatus === 'failed') {
+      alert('Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.');
+      return;
+    }
     const delta = Number(item.frequencyPerDay || 1);
     const previousStatus = item.status || (item.completedToday ? 'completed' : 'pending');
     const completionDate = date || item.date || new Date().toISOString().slice(0, 10);
