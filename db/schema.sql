@@ -35,15 +35,3 @@ CREATE TABLE IF NOT EXISTS recurring_task (
     status VARCHAR(64) NOT NULL DEFAULT 'pending'
 );
 
-CREATE TABLE IF NOT EXISTS item_history (
-    item_id VARCHAR(64) NOT NULL,
-    item_type VARCHAR(64) NOT NULL,
-    date VARCHAR(64) NOT NULL,
-    contribution INT NOT NULL,
-    PRIMARY KEY (item_id, date)
-);
-
-CREATE TABLE IF NOT EXISTS daily_heatmap (
-    date VARCHAR(64) NOT NULL PRIMARY KEY,
-    value INT NOT NULL DEFAULT 0
-);
