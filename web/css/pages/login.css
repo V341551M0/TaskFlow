@@ -34,6 +34,7 @@ h2{
   font-size: 60px; 
   margin-bottom: 32px;
   text-align: center;
+  font-weight: 700;
    
 }
 
@@ -110,5 +111,10 @@ input::placeholder{
 
 button{
     margin-top: 8px;
-    font-weight: 700;
+    font-weight: 600;
+}
+
+
+.card.loginActive .fcLogin{
+    opacity: 0%;
 }
