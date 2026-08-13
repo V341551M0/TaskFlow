@@ -3,12 +3,43 @@
 */
 const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'http://localhost:8080';
 const STORAGE_KEY = 'taskflow-state';
+const AUTH_KEY = 'taskflow-auth';
 
 document.addEventListener('DOMContentLoaded', function () {
+  if (!requireAuth()) {
+    return;
+  }
   attachNavigation();
   attachCreateModal();
+  attachLogout();
   loadItems();
 });
+
+function requireAuth() {
+  if (localStorage.getItem(AUTH_KEY) === 'true') {
+    return true;
+  }
+  window.location.replace(getLoginUrl());
+  return false;
+}
+
+function attachLogout() {
+  document.querySelectorAll('.logout-btn').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      localStorage.removeItem(AUTH_KEY);
+      window.location.href = getLoginUrl();
+    });
+  });
+}
+
+function getLoginUrl() {
+  const isSubpage = window.location.pathname.includes('/pages/') ||
+                    window.location.pathname.endsWith('Task.html') ||
+                    window.location.pathname.endsWith('HabitTask.html') ||
+                    window.location.pathname.endsWith('RecurringTask.html');
+  return isSubpage ? 'login.html' : 'pages/login.html';
+}
 
 window.openTaskModal = function () {
   const modal = document.getElementById('modal-task');
@@ -333,7 +364,6 @@ async function setItemStatus(id, type, date, action) {
       return;
     }
     const delta = Number(item.frequencyPerDay || 1);
-    const previousStatus = item.status || (item.completedToday ? 'completed' : 'pending');
     const completionDate = date || item.date || new Date().toISOString().slice(0, 10);
     const normalizedState = status === 'completed' ? 'completed' : status === 'failed' ? 'failed' : 'pending';
 
