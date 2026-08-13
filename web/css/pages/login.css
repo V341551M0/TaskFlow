@@ -2,6 +2,8 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: "Nexa";
+    font-weight: 400;
 }
 
 @font-face {
@@ -13,20 +15,32 @@
 
 @font-face {
     font-family: "Nexa";
-    src: url("../../assets/fonts/nexa-light.otf");
+    src: url("../../assets/fonts/Nexa-Regular.ttf");
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: "Nexa";
-    src: url("../../assets/fonts/nexa-light.otf");
-    font-weight: 400;
+    src: url("../../assets/fonts/Nexa\ Bold.otf");
+    font-weight: 700;
     font-style: normal;
 }
 body{
     color: white;
-    font-family: "Nexa", sans-serif;
+}
+
+h2{
+  font-size: 60px; 
+  margin-bottom: 32px;
+  text-align: center;
+   
+}
+
+p{
+    margin-bottom: 32px;
+    width: 400px;
+    text-align: center;
 }
 
 .containerFather{
@@ -69,6 +83,10 @@ form{
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    button{
+        background: linear-gradient(90deg, #968FF8 0%, #F1D3F9 100%);
+    }
 }
 
 input, button{
@@ -76,8 +94,21 @@ input, button{
     border-radius: 12px;
     border: none;
     outline: none;
+    font-size: 16px;
+    width: 400px;
 }
 
-h2{
-    margin-bottom: 32px;
+input{
+    background-color: rgba(255 255 255 /.2);
+    color: rgba(255 255 255 /.8);
+    font-family: "Nexa";
+}
+
+input::placeholder{
+    color: rgba(255 255 255 /.5);
+}
+
+button{
+    margin-top: 8px;
+    font-weight: 700;
 }
