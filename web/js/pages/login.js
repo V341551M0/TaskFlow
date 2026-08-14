@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       localStorage.setItem(AUTH_KEY, 'true');
-      window.location.href = '../index.html';
+      window.location.href = '../index.html';7
     });
   }
 });
