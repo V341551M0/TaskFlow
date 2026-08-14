@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
+/*
+  Animação tela de login
+*/
+
 let card = document.querySelector(".card");
 let loginButton = document.querySelector(".loginButton");
 let cadastroButton = document.querySelector(".cadastroButton");
