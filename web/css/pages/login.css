@@ -211,7 +211,7 @@ button:hover{
     transform: translateY(200%);
 }
 
-.formLogin{
+.card.cdActive .fcCd{
     opacity: 0;
     transform: translateY(200%);
     transition: all .3s 0;
