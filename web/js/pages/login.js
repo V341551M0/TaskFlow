@@ -17,14 +17,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 let card = document.querySelector(".card");
 let loginButton = document.querySelector(".loginButton");
-let cadastroButton = document.querySelector(".cadastroButton");
+let cdButton = document.querySelector(".cdButton");
 
 loginButton.onclick = () => {
-  card.classList.remove("cadastroActive")
+  card.classList.remove("cdActive")
   card.classList.add("loginActive")
 }
 
-cadastroButton.onclick = () => {
+cdButton.onclick = () => {
   card.classList.remove("loginActive")
-  card.classList.add("cadastroActive")
+  card.classList.add("cdActive")
 }
