@@ -12,6 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import dto.TaskDto;
 import service.TaskService;
+import util.Json;
 
 public class TaskController {
     private final TaskService taskService;
@@ -51,7 +52,7 @@ public class TaskController {
 
         if ("POST".equalsIgnoreCase(method)) {
             String body = readBody(exchange);
-            Map<String, String> data = parseJsonBody(body);
+            Map<String, String> data = Json.parseObject(body);
             String status = data.get("status");
             TaskDto updated;
             try {
@@ -84,7 +85,7 @@ public class TaskController {
 
         if ("POST".equalsIgnoreCase(method)) {
             String body = readBody(exchange);
-            Map<String, String> data = parseJsonBody(body);
+            Map<String, String> data = Json.parseObject(body);
             TaskDto deleted = taskService.deleteItem(data.get("id"), data.get("type"));
             if (deleted == null) {
                 sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
@@ -133,7 +134,7 @@ public class TaskController {
 
         if ("POST".equalsIgnoreCase(method)) {
             String body = readBody(exchange);
-            Map<String, String> data = parseJsonBody(body);
+            Map<String, String> data = Json.parseObject(body);
             TaskDto created = taskService.createItem(type, data);
             sendJson(exchange, 201, created);
             return;
@@ -148,29 +149,6 @@ public class TaskController {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
-    private Map<String, String> parseJsonBody(String body) {
-        Map<String, String> values = new HashMap<>();
-        String trimmed = body == null ? "" : body.trim();
-        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            String inner = trimmed.substring(1, trimmed.length() - 1).trim();
-            if (!inner.isEmpty()) {
-                for (String part : inner.split(",")) {
-                    String[] keyValue = part.split(":", 2);
-                    if (keyValue.length != 2) {
-                        continue;
-                    }
-                    String key = keyValue[0].trim().replace("\"", "");
-                    String value = keyValue[1].trim();
-                    if (value.startsWith("\"") && value.endsWith("\"")) {
-                        value = value.substring(1, value.length() - 1);
-                    }
-                    values.put(key, value);
-                }
-            }
-        }
-        return values;
-    }
-
     private void sendCors(HttpExchange exchange, int statusCode) throws IOException {
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -180,7 +158,7 @@ public class TaskController {
     }
 
     private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
-        String payload = toJson(body);
+        String payload = Json.toJson(body);
         byte[] response = payload.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
@@ -189,47 +167,5 @@ public class TaskController {
         exchange.sendResponseHeaders(statusCode, response.length);
         exchange.getResponseBody().write(response);
         exchange.close();
-    }
-
-    private String toJson(Object body) {
-        if (body instanceof String s) {
-            return "\"" + escape(s) + "\"";
-        }
-        if (body instanceof Number || body instanceof Boolean) {
-            return String.valueOf(body);
-        }
-        if (body instanceof Map<?, ?> map) {
-            StringBuilder builder = new StringBuilder("{");
-            boolean first = true;
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                if (!first) {
-                    builder.append(",");
-                }
-                builder.append("\"").append(escape(String.valueOf(entry.getKey()))).append("\":")
-                        .append(toJson(entry.getValue()));
-                first = false;
-            }
-            return builder.append("}").toString();
-        }
-        if (body instanceof List<?> list) {
-            StringBuilder builder = new StringBuilder("[");
-            boolean first = true;
-            for (Object item : list) {
-                if (!first) {
-                    builder.append(",");
-                }
-                builder.append(toJson(item));
-                first = false;
-            }
-            return builder.append("]").toString();
-        }
-        if (body instanceof TaskDto dto) {
-            return "{\"id\":\"" + escape(dto.getId()) + "\",\"name\":\"" + escape(dto.getName()) + "\",\"date\":\"" + escape(dto.getDate()) + "\",\"allDays\":" + dto.isAllDays() + ",\"frequencyPerDay\":\"" + escape(dto.getFrequencyPerDay()) + "\",\"type\":\"" + escape(dto.getType()) + "\",\"completedToday\":" + dto.isCompletedToday() + ",\"completionCount\":" + dto.getCompletionCount() + ",\"status\":\"" + escape(dto.getStatus()) + "\"}";
-        }
-        return "\"\"";
-    }
-
-    private String escape(String value) {
-        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
