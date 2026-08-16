@@ -8,9 +8,7 @@ Como as instruções usam `CREATE TABLE IF NOT EXISTS`, o arquivo é **idempoten
 
 ```
 db/
-├── schema.sql    ← executável (aplicado no startup)
-├── data.sql      ← dados iniciais (por enquanto vazio; o seed é feito pelo TaskRepository)
-└── queries.sql   ← consultas de apoio para exploração manual
+└── schema.sql    ← executável (aplicado no startup)
 ```
 
 > O `db/schema.sql` é a fonte da verdade executável. Este documento (`docs/database/*`) é apenas explicativo.
@@ -33,7 +31,7 @@ ALTER TABLE `user` ADD COLUMN email VARCHAR(255) NULL;
 CREATE INDEX idx_user_user ON `user` (`user`);
 ```
 
-Em ambiente de desenvolvimento, você pode aplicar o `ALTER` manualmente no MySQL. O arquivo `db/queries.sql` é um bom lugar para registrar esses comandos de evolução.
+Em ambiente de desenvolvimento, você pode aplicar o `ALTER` manualmente no MySQL. Registre os comandos de evolução aqui neste documento para manter o histórico de mudanças.
 
 ## Recomendação futura (Flyway/Liquibase)
 
@@ -46,4 +44,4 @@ Isso garante que todos os ambientes (local, CI, produção) apliquem a mesma seq
 
 ## Semeadura de dados
 
-O seed de dados de exemplo não fica no `data.sql` (que está vazio). Ele é feito em código por `TaskRepository.seedDataIfEmpty()`, que insere exemplos apenas quando as tabelas de itens estão vazias. Para ajustar os dados iniciais, edite esse método ou preencha `db/data.sql` e execute-o manualmente.
+O seed de dados de exemplo é feito em código por `TaskRepository.seedDataIfEmpty()`, que insere exemplos apenas quando as tabelas de itens estão vazias. Para ajustar os dados iniciais, edite esse método.

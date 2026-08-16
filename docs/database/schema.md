@@ -54,4 +54,15 @@ Agregação desnormalizada do heatmap por data, para leitura rápida na tela ini
 
 ## Consultas úteis
 
-Veja `db/queries.sql` para exemplos de consulta prontos para explorar os dados manualmente.
+Para explorar os dados manualmente:
+
+```sql
+-- Listar tarefas pendentes
+SELECT id, nome, data, status FROM task WHERE status = 'pending';
+
+-- Somar contribuições do heatmap
+SELECT date, value FROM daily_heatmap ORDER BY date;
+
+-- Histórico de conclusões de um item
+SELECT * FROM item_history WHERE item_id = '<id>' AND item_type = 'task';
+```

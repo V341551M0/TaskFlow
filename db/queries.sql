@@ -1,3 +1,0 @@
-/*
-    Consultas ao SQL
-*/

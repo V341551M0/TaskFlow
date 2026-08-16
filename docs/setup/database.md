@@ -7,8 +7,6 @@ O TaskFlow usa **MySQL** e cria o schema automaticamente no primeiro acesso. Est
 | Arquivo | Papel |
 |---|---|
 | `db/schema.sql` | **Executável** — cria as tabelas (`CREATE TABLE IF NOT EXISTS`). |
-| `db/data.sql` | Dados iniciais (atualmente vazio; o seed de exemplo é feito em código). |
-| `db/queries.sql` | Consultas de apoio para exploração manual. |
 | `docs/database/schema.md` | **Explicativo** — documenta as tabelas. |
 
 > O schema é aplicado automaticamente pelo `util.DatabaseConnection.initialize()` quando a aplicação inicia, então **não é preciso executar `schema.sql` manualmente** em cenário normal.

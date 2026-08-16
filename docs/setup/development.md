@@ -83,7 +83,7 @@ mvn test
 
 ```
 TaskFlow/
-├── db/                     # schema.sql (executável), data.sql, queries.sql
+├── db/                     # schema.sql (executável)
 ├── docs/                   # documentação (esta pasta)
 ├── src/main/java/          # backend Java (app, controller, service, repository, dto, util)
 ├── src/test/java/          # testes
