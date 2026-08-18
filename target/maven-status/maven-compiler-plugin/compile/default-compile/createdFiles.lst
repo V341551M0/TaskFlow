@@ -1,6 +1,0 @@
-controller/TaskController.class
-repository/TaskRepository.class
-service/TaskService.class
-util/DatabaseConnection.class
-dto/TaskDto.class
-app/TaskApplication.class

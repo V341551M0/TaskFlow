@@ -1,7 +1,7 @@
 /*
     Lógica da web e comunicação com o backend
 */
-const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:8080';
 const STORAGE_KEY = 'taskflow-state';
 const AUTH_KEY = 'taskflow-auth';
 
@@ -412,26 +412,6 @@ function updateMetrics(tasks, habits, recurringTasks) {
   if (taskCount) taskCount.textContent = `${tasks.length}/-`;
   if (habitCount) habitCount.textContent = `${habits.length}/-`;
   if (recurringCount) recurringCount.textContent = `${recurringTasks.length}/-`;
-}
-
-function createLocalItem(type, dados) {
-  const localState = loadLocalState();
-  const item = {
-    id: `local-${Date.now()}`,
-    name: dados.nome,
-    date: dados.data || new Date().toISOString().slice(0, 10),
-    allDays: Boolean(dados.todosOsDias),
-    frequencyPerDay: dados.vezesAoDia || '1',
-    type,
-    completedToday: false,
-    completionCount: 0,
-    status: 'pending'
-  };
-
-  const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
-  localState[targetList] = localState[targetList] || [];
-  localState[targetList].push(item);
-  persistLocalState(localState);
 }
 
 function loadLocalState() {

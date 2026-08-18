@@ -1,9 +1,8 @@
 /*
     Mapa de Calor: gera os quadrados dos últimos ~12 meses
-    (alinhados em semanas, de domingo a sábado) e os rótulos de mês.
+    (alinhados em semanas, de domingo a sábado).
 */
 const heatmap = document.querySelector('#heatmap');
-const months = document.querySelector('#months');
 
 const hoje = new Date();
 
@@ -43,37 +42,4 @@ dias.forEach(data => {
     });
 
     heatmap.appendChild(dia);
-});
-
-// =============================
-// CRIA OS MESES
-// =============================
-const semanas = Math.ceil(dias.length / 7);
-
-months.style.gridTemplateColumns =
-    `repeat(${semanas}, 12px)`;
-
-let ultimoMes = -1;
-
-dias.forEach((data, index) => {
-    // Domingo = início da semana
-    if (data.getDay() === 0) {
-        const mes = data.getMonth();
-
-        if (mes !== ultimoMes) {
-            const nomeMes = document.createElement('span');
-
-            nomeMes.textContent =
-                data.toLocaleDateString('pt-BR', {
-                    month: 'short'
-                });
-
-            nomeMes.style.gridColumn =
-                `${Math.floor(index / 7) + 1}`;
-
-            months.appendChild(nomeMes);
-
-            ultimoMes = mes;
-        }
-    }
 });
