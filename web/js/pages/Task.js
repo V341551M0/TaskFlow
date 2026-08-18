@@ -1,6 +1,6 @@
 /*
-    Mapa de Calor: gera os quadrados dos últimos ~12 meses
-    (alinhados em semanas, de domingo a sábado).
+    Mapa de Calor: gera os quadrados dos últimos ~12 meses,
+    do domingo inicial até hoje.
 */
 const heatmap = document.querySelector('#heatmap');
 
@@ -13,9 +13,6 @@ inicio.setDate(hoje.getDate() - 364);
 inicio.setDate(inicio.getDate() - inicio.getDay());
 
 const fim = new Date(hoje);
-
-// Avança até o sábado da semana atual
-fim.setDate(fim.getDate() + (6 - fim.getDay()));
 
 const dias = [];
 
