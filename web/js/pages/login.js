@@ -35,9 +35,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (loginForm) {
     loginForm.addEventListener('submit', function (event) {
       event.preventDefault();
-      const username = loginForm.querySelector('input[type="email"]').value.trim();
+      const username = loginForm.querySelector('input[type="text"]').value.trim();
       const password = loginForm.querySelector('input[type="password"]').value;
-      authenticate('/api/auth/login', { username, password }, 'E-mail ou senha inválidos.');
+      authenticate('/api/auth/login', { username, password }, 'E-mail, nome de usuário ou senha inválidos.');
     });
   }
 
@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
     registerForm.addEventListener('submit', function (event) {
       event.preventDefault();
       const inputs = registerForm.querySelectorAll('input');
-      const username = inputs[1].value.trim();
+      const name = inputs[0].value.trim();
+      const email = inputs[1].value.trim();
       const password = inputs[2].value;
       const confirmPassword = inputs[3].value;
 
@@ -54,13 +55,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      authenticate('/api/auth/register', { username, password }, 'Não foi possível criar a conta.');
+      authenticate('/api/auth/register', { name, email, password }, 'Não foi possível criar a conta.');
     });
   }
 });
 
 async function authenticate(endpoint, payload, fallbackMessage) {
-  if (!payload.username || !payload.password) {
+  const values = Object.values(payload);
+  if (values.some(function (value) {
+    return typeof value !== 'string' || value.trim() === '';
+  })) {
     alert('Preencha todos os campos.');
     return;
   }
@@ -83,7 +87,8 @@ async function authenticate(endpoint, payload, fallbackMessage) {
       localStorage.setItem(AUTH_KEY, 'true');
       localStorage.setItem(USER_KEY, JSON.stringify({
         id: data.id,
-        username: data.username
+        username: data.username,
+        email: data.email
       }));
       window.location.href = HOME_URL;
       return;

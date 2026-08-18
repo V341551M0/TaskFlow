@@ -54,7 +54,7 @@ public class AuthController {
 
         Map<String, String> data = Json.parseObject(readBody(exchange));
         try {
-            UserDto user = userService.register(data.get("username"), data.get("password"));
+            UserDto user = userService.register(data.get("name"), data.get("email"), data.get("password"));
             sendJson(exchange, 201, publicUser(user));
         } catch (IllegalStateException ex) {
             sendJson(exchange, 409, Map.of("message", ex.getMessage()));
@@ -67,6 +67,7 @@ public class AuthController {
         Map<String, String> result = new HashMap<>();
         result.put("id", user.getId());
         result.put("username", user.getUsername());
+        result.put("email", user.getEmail());
         result.put("date", user.getDate());
         return result;
     }

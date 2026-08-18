@@ -4,12 +4,13 @@ O schema executável fica em `db/schema.sql` e é aplicado automaticamente no st
 
 ## usuario
 
-Usuários da aplicação. O identificador de login é a coluna `user` (e-mail cadastrado no frontend); a senha é guardada como `salt:hash` (SHA-256 com salt — nunca em texto puro).
+Usuários da aplicação. O **e-mail** é o identificador de login (coluna `email`); o **nome de usuário** (coluna `user`) também pode ser usado no login. A senha é guardada como `salt:hash` (SHA-256 com salt — nunca em texto puro).
 
 | Coluna | Tipo | Descrição |
 |---|---|---|
 | `id` | VARCHAR(64) | Chave primária (UUID encurtado). |
-| `user` | VARCHAR(255) | Identificador de login (e-mail). |
+| `email` | VARCHAR(64) | E-mail de login (único). |
+| `user` | VARCHAR(255) | Nome de usuário (único). |
 | `data` | DATE | Data de criação da conta. |
 | `senha` | VARCHAR(128) | Hash da senha (`salt:hash`). |
 
