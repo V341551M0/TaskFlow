@@ -17,8 +17,6 @@
   --color-level-2: #006d32;
   --color-level-3: #26a641;
   --color-level-4: #39d353;
-  --color-success: #39d353;
-  --color-failed: #ef4444;
 }
 
 /* --- Estilos Gerais --- */
@@ -264,8 +262,10 @@ body {
 .day {
   width: 12px;
   height: 12px;
+  box-sizing: border-box;
 
   background: var(--color-level-0);
+  border: 1px solid var(--border-color);
   border-radius: 2px;
 
   position: relative;
@@ -273,34 +273,15 @@ body {
 }
 
 /* Estilização por nível de intensidade */
-.level-0 { background-color: var(--color-level-0); border: 1px solid var(--border-color); }
+.level-0 { background-color: var(--color-level-0); }
 .level-1 { background-color: var(--color-level-1); }
 .level-2 { background-color: var(--color-level-2); }
 .level-3 { background-color: var(--color-level-3); }
 .level-4 { background-color: var(--color-level-4); }
-.level-success { background-color: var(--color-success); }
-.level-failed { background-color: var(--color-failed); }
 
 /* Feedback visual de hover */
 .day:hover {
   outline: 1px solid var(--text-primary);
-}
-
-/* --- Tooltip simples com pure CSS --- */
-.day[data-tooltip]:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #6e7681;
-  color: #ffffff;
-  padding: 4px 8px;
-  font-size: 0.7rem;
-  border-radius: 4px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 10;
 }
 
 /* --- Legenda --- */
