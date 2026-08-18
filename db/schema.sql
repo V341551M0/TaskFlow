@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS recurring_task (
     status VARCHAR(64) NOT NULL DEFAULT 'pending'
 );
 
-CREATE TABLE usuario (
+CREATE TABLE IF NOT EXISTS usuario (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
     user VARCHAR(255) NOT NULL,
     data DATE,

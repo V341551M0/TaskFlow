@@ -16,7 +16,7 @@ public class UserRepository {
         String id = UUID.randomUUID().toString().substring(0, 8);
         String date = LocalDate.now().toString();
         String sql = """
-                INSERT INTO `user` (id, `user`, data, senha)
+                INSERT INTO usuario (id, `user`, data, senha)
                 VALUES (?, ?, ?, ?)
                 """;
 
@@ -35,7 +35,7 @@ public class UserRepository {
     }
 
     public UserDto findByUsername(String username) {
-        String sql = "SELECT id, `user`, data, senha FROM `user` WHERE `user` = ?";
+        String sql = "SELECT id, `user`, data, senha FROM usuario WHERE `user` = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

@@ -2,7 +2,7 @@
 
 O schema executável fica em `db/schema.sql` e é aplicado automaticamente no startup da aplicação (ver [setup/database.md](../setup/database.md)). Este documento explica cada tabela.
 
-## user
+## usuario
 
 Usuários da aplicação. O identificador de login é a coluna `user` (e-mail cadastrado no frontend); a senha é guardada como `salt:hash` (SHA-256 com salt — nunca em texto puro).
 

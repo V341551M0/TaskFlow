@@ -3,7 +3,7 @@
 ## Visão geral
 
 ```
-user
+usuario
   │
   └── (sem vínculo físico por foreign key com os itens hoje)
 
@@ -28,7 +28,7 @@ task (id=abc, vezes_ao_dia=2) ──conclui em 2026-08-16──►
 
 ## Usuários e atividades
 
-No estado atual, **as atividades não possuem `user_id`**: tarefas, hábitos e tarefas recorrentes são globais ao banco. O `user` é usado apenas para autenticação (login/cadastro).
+No estado atual, **as atividades não possuem `user_id`**: tarefas, hábitos e tarefas recorrentes são globais ao banco. A tabela `usuario` é usada apenas para autenticação (login/cadastro).
 
 Isso é uma limitação conhecida e uma evolução natural:
 

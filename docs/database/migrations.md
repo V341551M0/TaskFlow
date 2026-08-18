@@ -25,10 +25,10 @@ db/
 
 ```sql
 -- exemplo: adicionar coluna
-ALTER TABLE `user` ADD COLUMN email VARCHAR(255) NULL;
+ALTER TABLE `usuario` ADD COLUMN email VARCHAR(255) NULL;
 
 -- exemplo: criar índice
-CREATE INDEX idx_user_user ON `user` (`user`);
+CREATE INDEX idx_usuario_user ON `usuario` (`user`);
 ```
 
 Em ambiente de desenvolvimento, você pode aplicar o `ALTER` manualmente no MySQL. Registre os comandos de evolução aqui neste documento para manter o histórico de mudanças.

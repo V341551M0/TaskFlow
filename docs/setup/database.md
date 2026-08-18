@@ -95,7 +95,7 @@ habit
 item_history
 recurring_task
 task
-user
+usuario
 ```
 
 ## Migrações
