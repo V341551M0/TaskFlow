@@ -11,6 +11,7 @@
   --color-level-2: #006d32;
   --color-level-3: #26a641;
   --color-level-4: #39d353;
+  --color-failed: #ef4444;
 }
 
 /* --- Estilos Gerais --- */
@@ -264,6 +265,7 @@ body {
 .level-2 { background-color: var(--color-level-2); }
 .level-3 { background-color: var(--color-level-3); }
 .level-4 { background-color: var(--color-level-4); }
+.level-failed { background-color: var(--color-failed); }
 
 /* Feedback visual de hover */
 .day:hover {

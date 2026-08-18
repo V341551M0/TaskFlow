@@ -1,6 +1,6 @@
 /*
     Mapa de Calor: gera os quadrados dos últimos ~12 meses,
-    do domingo inicial até hoje.
+    do domingo inicial até hoje, e pinta conclusões e falhas.
 */
 const heatmap = document.querySelector('#heatmap');
 
@@ -26,7 +26,7 @@ while (dataAtual <= fim) {
 // =============================
 // CRIA OS DIAS
 // =============================
-dias.forEach(data => {
+const celulas = dias.map(data => {
     const dia = document.createElement('div');
 
     dia.classList.add('day');
@@ -39,4 +39,56 @@ dias.forEach(data => {
     });
 
     heatmap.appendChild(dia);
+
+    return { dia, data };
 });
+
+// =============================
+// PINTA CONCLUSÕES E FALHAS
+// =============================
+async function colorirHeatmap(dadosCarregados) {
+    const dados = dadosCarregados || await carregarHeatmap();
+
+    celulas.forEach(({ dia, data }) => {
+        dia.classList.remove('level-0', 'level-1', 'level-2', 'level-3', 'level-4', 'level-failed');
+
+        const valor = Number(dados[formatarData(data)] || 0);
+
+        if (valor > 0) {
+            const nivel = Math.min(4, Math.max(1, Math.ceil(valor)));
+            dia.classList.add(`level-${nivel}`);
+        } else if (valor < 0) {
+            dia.classList.add('level-failed');
+        }
+    });
+}
+
+async function carregarHeatmap() {
+    try {
+        const resposta = await fetch('http://localhost:8080/api/heatmap');
+        if (resposta.ok) {
+            return await resposta.json();
+        }
+    } catch (erro) {
+        console.warn('API indisponível para o heatmap, usando dados locais.', erro);
+    }
+
+    try {
+        const estado = JSON.parse(localStorage.getItem('taskflow-state') || '{}');
+        return estado.heatmap || {};
+    } catch (erro) {
+        return {};
+    }
+}
+
+function formatarData(data) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const diaMes = String(data.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${diaMes}`;
+}
+
+// Expõe a função para que o app.js a chame após cada atualização
+window.refreshHeatmap = colorirHeatmap;
+
+colorirHeatmap();

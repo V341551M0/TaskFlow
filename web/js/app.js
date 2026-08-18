@@ -212,6 +212,10 @@ function renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap) 
 
   updateMetrics(tasks, habits, recurringTasks);
   renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap);
+
+  if (typeof window.refreshHeatmap === 'function') {
+    window.refreshHeatmap(heatmap);
+  }
 }
 
 function renderList(containerId, items) {
@@ -482,12 +486,18 @@ function renderWeeklyBars(heatmap) {
     return;
   }
 
+  const labels = document.querySelectorAll('.chart-labels span');
   const values = [];
   const today = new Date();
   for (let index = 6; index >= 0; index -= 1) {
     const date = new Date(today);
     date.setDate(today.getDate() - index);
     values.push(heatmap[formatIsoDate(date)] || 0);
+
+    if (labels[index]) {
+      const label = date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+      labels[index].textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    }
   }
 
   const maxValue = Math.max(...values, 1);

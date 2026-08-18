@@ -316,7 +316,8 @@ public class TaskRepository {
         int current = getHeatmapValue(date);
         int next = current + delta;
 
-        if (next <= 0) {
+        // Remove a linha somente quando o valor zera; falhas ficam negativas
+        if (next == 0) {
             String deleteSql = "DELETE FROM daily_heatmap WHERE date = ?";
             try (Connection connection = DatabaseConnection.getConnection();
                  PreparedStatement statement = connection.prepareStatement(deleteSql)) {
