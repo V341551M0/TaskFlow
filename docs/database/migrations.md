@@ -42,6 +42,6 @@ Se o schema começar a evoluir com frequência, adote uma ferramenta de migraç�
 
 Isso garante que todos os ambientes (local, CI, produção) apliquem a mesma sequência de mudanças sem conflito.
 
-## Semeadura de dados
+## Dados iniciais
 
-O seed de dados de exemplo é feito em código por `TaskRepository.seedDataIfEmpty()`, que insere exemplos apenas quando as tabelas de itens estão vazias. Para ajustar os dados iniciais, edite esse método.
+Não há seed de dados de exemplo: as tabelas de itens (task, habit, recurring_task) começam **vazias** e são preenchidas apenas quando o usuário cria atividades na aplicação.

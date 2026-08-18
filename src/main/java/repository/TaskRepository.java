@@ -18,7 +18,6 @@ public class TaskRepository {
 
     public TaskRepository() {
         DatabaseConnection.initialize();
-        seedDataIfEmpty();
     }
 
     public List<TaskDto> findTasks() {
@@ -403,18 +402,5 @@ public class TaskRepository {
         } catch (Exception ex) {
             return 1;
         }
-    }
-
-    private void seedDataIfEmpty() {
-        if (!findTasks().isEmpty() || !findHabits().isEmpty() || !findRecurringTasks().isEmpty()) {
-            return;
-        }
-
-        saveItem("task", "Estudar Java", "2026-08-06", false, "2");
-        saveItem("task", "Revisar projeto", "2026-08-07", true, "1");
-        saveItem("habit", "Beber 2L de água", "2026-08-06", true, "3");
-        saveItem("habit", "Meditar 10 minutos", "2026-08-06", true, "1");
-        saveItem("recurring", "Tarefa semanal", "2026-08-08", true, "1");
-        saveItem("recurring", "Limpar workspace", "2026-08-06", false, "2");
     }
 }

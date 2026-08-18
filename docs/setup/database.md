@@ -55,8 +55,9 @@ mvn exec:java
 Na inicialização a aplicação:
 1. conecta ao MySQL;
 2. cria o banco `taskflow_db` (se não existir);
-3. executa `db/schema.sql` (idempotente);
-4. insere dados de exemplo se as tabelas de itens estiverem vazias.
+3. executa `db/schema.sql` (idempotente).
+
+As tabelas de itens (task, habit, recurring_task) começam vazias — não há dados de exemplo pré-cadastrados.
 
 ## Opção B — Instância isolada (fallback do `run.sh`)
 

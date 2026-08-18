@@ -23,6 +23,20 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+#heatmap {
+    display: grid;
+    grid-template-columns: repeat(53, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.day {
+    width: 12px;
+    height: 12px;
+    background: #212b3a;
+    border-radius: 2px;
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
