@@ -71,22 +71,36 @@
             </div>
          </div>
 
-    <!-- Painel do Mapa de Calor-->
-           <section class="card heatmap-card">
+    <!-- Painel do Mapa de Calor -->
+    <section class="card heatmap-card">
       <h2>Atividade no Último Ano</h2>
 
       <!-- Container do Mapa de Calor -->
       <div class="heatmap-wrapper">
-        
+
         <!-- Rótulos dos Dias da Semana -->
         <ul class="weekdays">
+          <li>Dom</li>
           <li>Seg</li>
+          <li>Ter</li>
           <li>Qua</li>
-          <li>Sexta</li>
+          <li>Qui</li>
+          <li>Sex</li>
+          <li>Sab</li>
         </ul>
 
-     <!-- Grade de Contribuições (Semanas em Colunas x 7 Dias) -->
-        <div id="heatmap"></div>
+        <!-- Calendário -->
+        <div class="calendar">
+
+          <!-- Meses -->
+          <div id="months"></div>
+
+          <!-- Dias (semanas em colunas x 7 dias) -->
+          <div id="heatmap"></div>
+
+        </div>
+
+      </div>
 
       <!-- Legenda do Mapa de Calor -->
       <div class="heatmap-legend">

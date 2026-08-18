@@ -212,7 +212,6 @@ function renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap) 
 
   updateMetrics(tasks, habits, recurringTasks);
   renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap);
-  renderHeatmap(heatmap);
 }
 
 function renderList(containerId, items) {
@@ -559,34 +558,6 @@ function renderDonut(items) {
   donutSegment.style.strokeDashoffset = `${circumference * (1 - ratio)}`;
 }
 
-function renderHeatmap(heatmap) {
-  const heatmapGrid = document.querySelector('.heatmap-grid');
-  if (!heatmapGrid) {
-    return;
-  }
-
-  const daysToShow = 112;
-  const cells = [];
-  const today = new Date();
-
-  for (let index = daysToShow - 1; index >= 0; index -= 1) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - index);
-    const isoDate = formatIsoDate(date);
-    const value = heatmap[isoDate] || 0;
-    const levelClass = getHeatClass(value);
-    const tooltip = getHeatTooltip(value, date);
-    cells.push(`<span class="day ${levelClass}" data-tooltip="${tooltip}"></span>`);
-  }
-
-  const weeks = [];
-  while (cells.length) {
-    weeks.push(`<div class="week">${cells.splice(0, 7).join('')}</div>`);
-  }
-
-  heatmapGrid.innerHTML = weeks.join('');
-}
-
 function calculateWeeklyTotal(heatmap) {
   let total = 0;
   const today = new Date();
@@ -626,34 +597,9 @@ function sumValuesForMonth(heatmap, referenceDate) {
   return total;
 }
 
-function getHeatClass(value) {
-  if (value > 0) {
-    return 'level-success';
-  }
-  if (value < 0) {
-    return 'level-failed';
-  }
-  return 'level-0';
-}
-
-function getHeatTooltip(value, date) {
-  const label = formatDateLabel(date);
-  if (value > 0) {
-    return `${label}: ${value} conclusão${value > 1 ? 's' : ''}`;
-  }
-  if (value < 0) {
-    return `${label}: ${Math.abs(value)} falha${Math.abs(value) > 1 ? 's' : ''}`;
-  }
-  return `${label}: sem atividade`;
-}
-
 function formatIsoDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
-}
-
-function formatDateLabel(date) {
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date);
 }

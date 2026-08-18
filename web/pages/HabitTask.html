@@ -29,11 +29,11 @@
             <div class="modal-content">
                 <span class="close-btn" onclick="closeTaskModal()">&times;</span>
                 <h2>Criar Hábito</h2>
-                <p class="modal-subtitle">Cadastre um novo hábito e acompanhe sua evolução no calor do mês.</p>
+                <p class="modal-subtitle">Cadastre um novo hábito e acompanhe sua evolução ao longo do ano.</p>
     
                 <form id="form-task">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" required>
+                    <input type="text" id="nome" required placeholder="Ex: Beber 2L de água">
 
                     <label for="data">Data:</label>
                     <input type="date" id="data">
@@ -71,22 +71,36 @@
         <div id="habit-list" class="items-list"></div>
     </section>
 
-    <!-- Painel do Mapa de Calor-->
-           <section class="card heatmap-card">
+    <!-- Painel do Mapa de Calor -->
+    <section class="card heatmap-card">
       <h2>Atividade no Último Ano</h2>
 
       <!-- Container do Mapa de Calor -->
       <div class="heatmap-wrapper">
-        
+
         <!-- Rótulos dos Dias da Semana -->
         <ul class="weekdays">
+          <li>Dom</li>
           <li>Seg</li>
+          <li>Ter</li>
           <li>Qua</li>
-          <li>Sexta</li>
+          <li>Qui</li>
+          <li>Sex</li>
+          <li>Sab</li>
         </ul>
 
-     <!-- Grade de Contribuições (Semanas em Colunas x 7 Dias) -->
-        <div id="heatmap"></div>
+        <!-- Calendário -->
+        <div class="calendar">
+
+          <!-- Meses -->
+          <div id="months"></div>
+
+          <!-- Dias (semanas em colunas x 7 dias) -->
+          <div id="heatmap"></div>
+
+        </div>
+
+      </div>
 
       <!-- Legenda do Mapa de Calor -->
       <div class="heatmap-legend">
@@ -99,30 +113,6 @@
         <span>Mais</span>
       </div>
     </section>
-    <!-- Modal (janela de criação) -->
-    <div id="modal-task" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeTaskModal()">&times;</span>
-            <h2>Criar Hábito</h2>
-            <p class="modal-subtitle">Cadastre um novo hábito e acompanhe sua evolução no calor do mês.</p>
-
-            <form id="form-task">
-                <label for="nome">Nome:</label>
-                <input type="text" id="nome" required placeholder="Ex: Beber 2L de água">
-
-                <label for="data">Data:</label>
-                <input type="date" id="data">
-
-                <label for="diario">Todos os dias?</label>
-                <input type="checkbox" id="diario">
-
-                <label for="vezes-dia">Vezes ao dia:</label>
-                <input type="number" id="vezes-dia" min="1" value="1">
-
-                <button type="submit">Salvar</button>
-            </form>
-        </div>
-    </div>
 
     <script src="../js/app.js"></script>
 </body>
