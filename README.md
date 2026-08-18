@@ -41,7 +41,7 @@ mvn compile
 
 Cadastre um usuário (o e-mail vira o login) e explore a aplicação.
 
-> O `run.sh` sobe uma instância MySQL isolada em `/tmp/taskflow-mysql` (o AppArmor do Ubuntu restringe o `mysqld`). Após reiniciar o PC, rode `./run.sh` novamente. Detalhes em [docs/setup/development.md](docs/setup/development.md).
+> O `run.sh` detecta o MySQL a usar: prefere o **MySQL do sistema** (`127.0.0.1:3306`, persistente) quando acessível e, caso contrário, sobe uma instância isolada em `/tmp/taskflow-mysql` na porta `3307` (o AppArmor do Ubuntu restringe o `mysqld`). Para dados persistentes, configure o usuário no MySQL do sistema — ver [docs/setup/database.md](docs/setup/database.md).
 
 ## Tecnologias
 

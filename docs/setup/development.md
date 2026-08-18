@@ -29,17 +29,31 @@ mvn compile
 
 ### 3. Subir a infraestrutura (MySQL + API)
 
-A forma mais simples é usar o script que já cuida de tudo (cria/sobe um MySQL isolado e inicia a API na porta 8080):
+A forma mais simples é usar o script, que detecta o MySQL disponível e inicia a API na porta 8080:
 
 ```bash
 ./run.sh
 ```
 
-> **Nota sobre AppArmor (Ubuntu):** o perfil do `mysqld` só permite dados em `/tmp` e `/var/lib/mysql`. Por isso o script usa uma instância isolada em `/tmp/taskflow-mysql`. Como `/tmp` é apagado em reinicializações, **rode `./run.sh` de novo após reiniciar o PC**. Alternativa permanente: configurar um usuário no MySQL do sistema (ver [database.md](database.md)).
+Como o script decide o banco (detalhes em [database.md](database.md)):
+
+1. Tenta conectar no **MySQL do sistema** (`127.0.0.1:3306`, `root`/`root`) — recomendado e persistente. Para isso, configure o usuário com senha uma única vez:
+
+   ```bash
+   sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY 'root'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+   ```
+
+2. Sem acesso ao do sistema, cria/sobe uma **instância isolada** em `/tmp/taskflow-mysql` na porta `3307`.
+
+> **Nota sobre AppArmor (Ubuntu):** o perfil do `mysqld` só permite dados em `/tmp` e `/var/lib/mysql`. Por isso o fallback usa uma instância isolada em `/tmp/taskflow-mysql`. Como `/tmp` é apagado em reinicializações, **rode `./run.sh` de novo após reiniciar o PC** (os dados do fallback se perdem). Com o MySQL do sistema configurado, os dados são persistentes.
 
 Ou, manualmente:
 
 ```bash
+# com o MySQL do sistema já configurado
+mvn exec:java
+
+# ou, para usar a instância isolada em /tmp:
 # terminal 1 — API
 export MYSQL_HOST=127.0.0.1 MYSQL_PORT=3307 MYSQL_USER=root MYSQL_PASSWORD=root
 mvn exec:java
@@ -88,6 +102,6 @@ TaskFlow/
 ├── src/main/java/          # backend Java (app, controller, service, repository, dto, util)
 ├── src/test/java/          # testes
 ├── web/                    # frontend estático (HTML/CSS/JS)
-├── run.sh                  # sobe MySQL isolado + API
+├── run.sh                  # detecta o MySQL (sistema ou isolado) e sobe a API
 └── pom.xml
 ```

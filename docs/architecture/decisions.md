@@ -58,6 +58,6 @@ Este documento registra as principais decisões de projeto e o motivo de cada um
 
 ## 10. Script de inicialização (`run.sh`)
 
-**Decisão:** um único script sobe o MySQL isolado e a API localmente, de forma idempotente.
+**Decisão:** um único script sobe a infraestrutura local de forma idempotente, detectando o MySQL a usar: primeiro tenta o **MySQL do sistema** (`127.0.0.1:3306`, persistente) e, sem acesso, cai para uma **instância isolada** em `/tmp/taskflow-mysql` na porta `3307`.
 
-**Motivo:** o MySQL do sistema usa `auth_socket` e o AppArmor do Ubuntu restringe o `mysqld` a `/tmp` e `/var/lib/mysql`. O script cria uma instância isolada em `/tmp/taskflow-mysql` e inicia a API, eliminando passos manuais. Detalhes em [setup/development.md](../setup/development.md).
+**Motivo:** o MySQL do sistema usa `auth_socket` e o AppArmor do Ubuntu restringe o `mysqld` a `/tmp` e `/var/lib/mysql`. Preferir o banco do sistema quando acessível mantém os dados persistentes entre reinicializações; o fallback em `/tmp` elimina passos manuais em máquinas sem essa configuração. Detalhes em [setup/database.md](../setup/database.md) e [setup/development.md](../setup/development.md).
