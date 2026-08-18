@@ -15,28 +15,25 @@ O TaskFlow usa **MySQL** e cria o schema automaticamente no primeiro acesso. Est
 
 O `./run.sh` verifica, nesta ordem:
 
-1. **MySQL do sistema** (`127.0.0.1:3306`, padrão) — se conseguir conectar com as credenciais configuradas (`MYSQL_USER`/`MYSQL_PASSWORD`, padrão `root`/`root`), **usa esse banco** (persistente). É o cenário recomendado.
+1. **MySQL do sistema** (`127.0.0.1:3306`, padrão) — se conseguir conectar com as credenciais configuradas (`MYSQL_USER`/`MYSQL_PASSWORD`, padrão `root`/`root`), **usa esse banco** (persistente). É o cenário recomendado. Nesse caso, o script **encerra e remove** a instância isolada de `/tmp` (que fica redundante).
 2. **Instância isolada** — sem acesso ao do sistema, cria/sobe uma instância própria em `/tmp/taskflow-mysql` na porta `3307` e aponta a API para ela.
 
 As variáveis `MYSQL_HOST`/`MYSQL_PORT`/`MYSQL_DB`/`MYSQL_USER`/`MYSQL_PASSWORD` controlam a conexão (padrões: `127.0.0.1:3306`, `taskflow_db`, `root`/`root`).
 
 ## Opção A — MySQL do sistema (3306) — recomendada
 
-### 1. Garantir um usuário com senha
+### 1. Aplicar o schema no MySQL do sistema (uma única vez)
 
-No Ubuntu/Debian, o `root` do MySQL usa `auth_socket` (login apenas por `sudo mysql`), o que impede a conexão JDBC com `root/root`. Crie/ajuste um usuário com senha (uma única vez):
+No Ubuntu/Debian, o `root` do MySQL usa `auth_socket` (login apenas por `sudo mysql`), o que impede a conexão JDBC com `root/root`. Aplique o `db/schema.sql` (cria banco, tabelas e o usuário com senha — uma única vez):
 
 ```bash
-sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY 'root'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+sudo mysql < db/schema.sql
 ```
 
-Equivalente em SQL (via `sudo mysql`):
-
-```sql
-CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY 'root';
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-```
+O que o arquivo faz:
+- cria o banco `taskflow_db` (se não existir);
+- cria as tabelas (`CREATE TABLE IF NOT EXISTS`);
+- cria/garante o usuário `'root'@'127.0.0.1'` com senha `root` (acesso JDBC).
 
 ### 2. Iniciar a aplicação
 

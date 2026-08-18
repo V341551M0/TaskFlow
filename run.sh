@@ -2,7 +2,8 @@
 #
 # Sobe a infraestrutura do TaskFlow:
 #   1. MySQL do sistema (porta 3306) se acessível com as credenciais
-#      configuradas — preferido, pois é persistente.
+#      configuradas — preferido, pois é persistente. Nesse caso, encerra e
+#      remove a instância isolada em /tmp (que fica redundante).
 #   2. Caso contrário, sobe uma instância isolada em /tmp/taskflow-mysql
 #      (necessária no Ubuntu por causa do AppArmor, que restringe o mysqld
 #      a /tmp e /var/lib/mysql).
@@ -36,6 +37,19 @@ if "${MYSQL_CMD[@]}" -e "SELECT 1" >/dev/null 2>&1; then
   echo "[mysql] usando MySQL do sistema em $MYSQL_HOST:$MYSQL_PORT (persistente)"
   # Garante que o banco exista (o JDBC também cria via createDatabaseIfNotExist)
   "${MYSQL_CMD[@]}" -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB\`" >/dev/null 2>&1 || true
+
+  # Instância isolada em /tmp agora é redundante — encerra e remove
+  if [ -S "$MYSQL_SOCKET" ] && mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1; then
+    echo "[mysql] encerrando instância isolada ($TASKFLOW_TMP)"
+    mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot shutdown >/dev/null 2>&1 || true
+    sleep 1
+    # API antiga apontava para o banco isolado — será reiniciada no banco do sistema
+    pkill -f 'app.TaskApplication' 2>/dev/null || true
+  fi
+  if [ -d "$TASKFLOW_TMP" ] && { [ -S "$MYSQL_SOCKET" ] || [ -d "$MYSQL_DATA_DIR" ]; }; then
+    rm -rf "$TASKFLOW_TMP"
+    echo "[mysql] instância isolada removida ($TASKFLOW_TMP)"
+  fi
 else
   echo "[mysql] sem acesso a $MYSQL_HOST:$MYSQL_PORT — usando instância isolada em /tmp"
 

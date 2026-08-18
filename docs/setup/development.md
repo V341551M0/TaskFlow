@@ -37,13 +37,15 @@ A forma mais simples é usar o script, que detecta o MySQL disponível e inicia 
 
 Como o script decide o banco (detalhes em [database.md](database.md)):
 
-1. Tenta conectar no **MySQL do sistema** (`127.0.0.1:3306`, `root`/`root`) — recomendado e persistente. Para isso, configure o usuário com senha uma única vez:
+1. Tenta conectar no **MySQL do sistema** (`127.0.0.1:3306`, `root`/`root`) — recomendado e persistente. Para isso, aplique o schema uma única vez:
 
    ```bash
-   sudo mysql -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY 'root'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+   sudo mysql < db/schema.sql
    ```
 
 2. Sem acesso ao do sistema, cria/sobe uma **instância isolada** em `/tmp/taskflow-mysql` na porta `3307`.
+
+Quando o MySQL do sistema está acessível, o script **encerra e remove** a instância isolada de `/tmp` (redundante) e reinicia a API apontando para o banco persistente.
 
 > **Nota sobre AppArmor (Ubuntu):** o perfil do `mysqld` só permite dados em `/tmp` e `/var/lib/mysql`. Por isso o fallback usa uma instância isolada em `/tmp/taskflow-mysql`. Como `/tmp` é apagado em reinicializações, **rode `./run.sh` de novo após reiniciar o PC** (os dados do fallback se perdem). Com o MySQL do sistema configurado, os dados são persistentes.
 
