@@ -2,7 +2,7 @@
 .venv
 .idea/
 .vscode/
-.github
+.github/
 *.iml
 *.code-workspace
 
