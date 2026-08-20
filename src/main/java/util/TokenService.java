@@ -7,7 +7,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 public final class TokenService {
-    private static final String SECRET = getEnvOrDefault("JWT_SECRET", "taskflow-dev-secret-mude-em-producao-2026");
+    private static final String SECRET = loadSecret();
     private static final long VALIDITY_MS = 24L * 60 * 60 * 1000;
     private static final Base64.Encoder URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
     private static final Base64.Decoder URL_DECODER = Base64.getUrlDecoder();
@@ -122,9 +122,18 @@ public final class TokenService {
         return MessageDigest.isEqualSafe(a, b);
     }
 
-    private static String getEnvOrDefault(String name, String defaultValue) {
-        String value = System.getenv(name);
-        return (value != null && !value.isBlank()) ? value : defaultValue;
+    private static String loadSecret() {
+        String secret = System.getenv("JWT_SECRET");
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "A variável de ambiente JWT_SECRET é obrigatória. Defina-a antes de iniciar a aplicação "
+                            + "(ex.: export JWT_SECRET=$(openssl rand -hex 32) ou via .env).");
+        }
+        if (secret.length() < 32) {
+            throw new IllegalStateException(
+                    "JWT_SECRET é curta demais para HS256. Use pelo menos 32 caracteres (ex.: openssl rand -hex 32).");
+        }
+        return secret;
     }
 
     private static final class MessageDigest {

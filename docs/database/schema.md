@@ -1,6 +1,6 @@
 # Schema do Banco de Dados
 
-O schema executável fica em `db/schema.sql` e é aplicado automaticamente no startup da aplicação (ver [setup/database.md](../setup/database.md)). Este documento explica cada tabela.
+As tabelas são criadas pelas migrações Flyway em `src/main/resources/db/migration/` (aplicadas no startup da aplicação; ver [migrations.md](migrations.md)). O `db/schema.sql` cuida apenas do bootstrap (bancos e usuário). Este documento explica cada tabela.
 
 ## usuario
 

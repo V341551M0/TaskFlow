@@ -1,10 +1,8 @@
-/*
-    Estrutura das tabelas (MySQL)
-    Executado pelo aplicativo no startup (DatabaseConnection.initialize()).
-    Idempotente: CREATE TABLE IF NOT EXISTS.
-*/
+-- V1: schema inicial do TaskFlow.
+-- Executado pelo Flyway no startup (DatabaseConnection.initialize()).
+-- Aplica uma única vez; nunca altera tabelas já existentes.
 
-CREATE TABLE IF NOT EXISTS usuario (
+CREATE TABLE usuario (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     user VARCHAR(255) NOT NULL,
@@ -14,7 +12,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     UNIQUE KEY uk_usuario_user (user)
 );
 
-CREATE TABLE IF NOT EXISTS task (
+CREATE TABLE task (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     data DATE,
@@ -28,7 +26,7 @@ CREATE TABLE IF NOT EXISTS task (
     CONSTRAINT fk_task_user FOREIGN KEY (user_id) REFERENCES usuario (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS habit (
+CREATE TABLE habit (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     data DATE,
@@ -42,7 +40,7 @@ CREATE TABLE IF NOT EXISTS habit (
     CONSTRAINT fk_habit_user FOREIGN KEY (user_id) REFERENCES usuario (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS recurring_task (
+CREATE TABLE recurring_task (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     data DATE,
@@ -56,7 +54,7 @@ CREATE TABLE IF NOT EXISTS recurring_task (
     CONSTRAINT fk_recurring_task_user FOREIGN KEY (user_id) REFERENCES usuario (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS item_history (
+CREATE TABLE item_history (
     item_id VARCHAR(64) NOT NULL,
     item_type VARCHAR(64) NOT NULL,
     date DATE NOT NULL,
@@ -67,7 +65,7 @@ CREATE TABLE IF NOT EXISTS item_history (
     CONSTRAINT fk_item_history_user FOREIGN KEY (user_id) REFERENCES usuario (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS daily_heatmap (
+CREATE TABLE daily_heatmap (
     date DATE NOT NULL,
     value INT NOT NULL DEFAULT 0,
     user_id VARCHAR(64) NOT NULL,

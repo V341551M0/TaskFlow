@@ -41,7 +41,7 @@ mvn compile
 
 Cadastre um usuário (informe nome, e-mail e senha) e explore a aplicação. O login aceita **e-mail ou nome de usuário**.
 
-> O `run.sh` detecta o MySQL a usar: prefere o **MySQL do sistema** (`127.0.0.1:3306`, persistente) quando acessível e, caso contrário, sobe uma instância isolada em `/tmp/taskflow-mysql` na porta `3307` (o AppArmor do Ubuntu restringe o `mysqld`). Para dados persistentes, configure o usuário no MySQL do sistema — ver [docs/setup/database.md](docs/setup/database.md).
+> O `run.sh` usa **exclusivamente o MySQL do sistema** em `127.0.0.1:3306` (banco `taskflow_db`, usuário `taskflow`) — não há fallback em `/tmp`. Para dados persistentes, configure o usuário no MySQL do sistema — ver [docs/setup/database.md](docs/setup/database.md).
 
 ## Tecnologias
 

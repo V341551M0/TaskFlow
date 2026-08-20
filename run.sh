@@ -1,52 +1,67 @@
 #!/usr/bin/env bash
 #
-# Sobe a infraestrutura do TaskFlow:
-#   1. MySQL do sistema (porta 3306) se acessível com as credenciais
-#      configuradas — preferido, pois é persistente. Nesse caso, encerra e
-#      remove a instância isolada em /tmp (que fica redundante).
-#   2. Caso contrário, sobe uma instância isolada em /tmp/taskflow-mysql
-#      (necessária no Ubuntu por causa do AppArmor, que restringe o mysqld
-#      a /tmp e /var/lib/mysql).
-#   3. Inicia a API Java na porta 8080 apontando para o MySQL escolhido.
+# Sobe a infraestrutura do TaskFlow usando exclusivamente o MySQL do sistema:
+#   1. Conecta no MySQL persistente em 127.0.0.1:3306 com o usuário "taskflow".
+#   2. Garante que o banco taskflow_db exista.
+#   3. Inicia a API Java na porta 8080 apontando para esse banco.
 #
-# Modo "backup": cria um dump do banco em $BACKUP_FILE (usado pelo systemd).
+# Se o MySQL do sistema não estiver acessível, o script encerra com erro —
+# NÃO cria instância alternativa em /tmp (os dados devem viver apenas no
+# MySQL persistente).
 #
-# Nota: a instância isolada vive em /tmp e é apagada em reinicializações —
-# rode ./run.sh novamente após reiniciar o PC. Para uma solução persistente,
-# configure o MySQL do sistema (ver docs/setup/database.md).
+# Modo "backup": cria um dump do banco em $BACKUP_FILE (usado pelo systemd
+# no encerramento via ExecStop).
 #
 set -euo pipefail
 
-TASKFLOW_TMP="${TASKFLOW_TMP:-/tmp/taskflow-mysql}"
-MYSQL_DATA_DIR="$TASKFLOW_TMP/data"
-MYSQL_SOCKET="$TASKFLOW_TMP/mysql.sock"
-MYSQL_LOG="$TASKFLOW_TMP/mysqld.log"
-API_PORT="${API_PORT:-8080}"
-API_LOG="$TASKFLOW_TMP/api.log"
-BACKUP_DIR="${TASKFLOW_BACKUP_DIR:-$HOME/.taskflow}"
-BACKUP_FILE="$BACKUP_DIR/taskflow_db.sql.gz"
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE="$BASE_DIR/.env"
 
-# Credenciais configuráveis (mesmas usadas por util/DatabaseConnection)
+# Carrega .env (ignorado pelo Git) se existir — permite sobrescrever as
+# credenciais MYSQL_* e a JWT_SECRET por ambiente, sem valores em código.
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
+# Credenciais do MySQL persistente do sistema (mesmas usadas por util/DatabaseConnection)
 MYSQL_HOST="${MYSQL_HOST:-127.0.0.1}"
 MYSQL_PORT="${MYSQL_PORT:-3306}"
 MYSQL_DB="${MYSQL_DB:-taskflow_db}"
 MYSQL_USER="${MYSQL_USER:-taskflow}"
-MYSQL_PASSWORD="${MYSQL_PASSWORD:-taskflow}"
+MYSQL_PASSWORD="${MYSQL_PASSWORD:-TaskFlow@2026}"
 
-# ------------------------------------------------------- Backup/Restore
-# Cria um dump do banco em $BACKUP_FILE (fora do /tmp) sempre que houver dados.
+API_PORT="${API_PORT:-8080}"
+API_LOG="${API_LOG:-/tmp/taskflow-api.log}"
+CP_FILE="${CP_FILE:-/tmp/taskflow-classpath.txt}"
+BACKUP_DIR="${TASKFLOW_BACKUP_DIR:-$HOME/.taskflow}"
+BACKUP_FILE="$BACKUP_DIR/taskflow_db.sql.gz"
+
+# JWT_SECRET é obrigatória para a aplicação (não há default no código). Se não
+# estiver definida, gera uma e persiste no .env para que os tokens sobrevivam a
+# reinicializações locais.
+if [ -z "${JWT_SECRET:-}" ]; then
+  JWT_SECRET="$(openssl rand -hex 32 2>/dev/null || head -c 64 /dev/urandom | tr -dc 'a-f0-9')"
+  printf 'JWT_SECRET=%s\n' "$JWT_SECRET" >> "$ENV_FILE"
+  echo "[api] JWT_SECRET gerada e salva em .env (mantenha em segredo; não versione)"
+fi
+
+MYSQL_CMD=(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
+
+# ------------------------------------------------------------- Backup
+# Cria um dump do banco persistente em $BACKUP_FILE (fora do /tmp).
+# Tratado apenas como backup — nunca usado para criar um banco alternativo.
 backup_mysql() {
-  local host="$1" port="$2"
-  local cmd=(mysql -h"$host" -P"$port" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
   local tables
-  tables="$("${cmd[@]}" -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$MYSQL_DB'" 2>/dev/null || true)"
+  tables="$("${MYSQL_CMD[@]}" -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$MYSQL_DB'" 2>/dev/null || true)"
   if [ "${tables:-0}" = "0" ]; then
     return 0
   fi
 
   mkdir -p "$BACKUP_DIR"
-  if mysqldump -h"$host" -P"$port" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" \
+  if mysqldump -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" \
       --single-transaction "$MYSQL_DB" 2>/dev/null | gzip > "$BACKUP_FILE.tmp"; then
     if [ -s "$BACKUP_FILE.tmp" ]; then
       mv "$BACKUP_FILE.tmp" "$BACKUP_FILE"
@@ -59,112 +74,30 @@ backup_mysql() {
   fi
 }
 
-# Se o banco está vazio e existe um backup, restaura os dados (sobrevive a reinícios).
-restore_mysql() {
-  local host="$1" port="$2"
-  local cmd=(mysql -h"$host" -P"$port" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
-  [ -f "$BACKUP_FILE" ] || return 0
-
-  local has_users
-  has_users="$("${cmd[@]}" -N -e "SELECT COUNT(*) FROM \`$MYSQL_DB\`.usuario" 2>/dev/null || true)"
-  [ "${has_users:-0}" != "0" ] && return 0
-
-  echo "[backup] banco vazio — restaurando $BACKUP_FILE"
-  gunzip -c "$BACKUP_FILE" | "${cmd[@]}" "$MYSQL_DB" >/dev/null 2>&1 || echo "[backup] falha ao restaurar"
-}
-
 # Modo "backup": usado pelo systemd no encerramento (ExecStop).
+# Dump exclusivamente do MySQL persistente em 127.0.0.1:3306 com taskflow/TaskFlow@2026.
 if [ "${1:-}" = "backup" ]; then
-  if mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1; then
-    backup_mysql 127.0.0.1 3307
-  else
-    backup_mysql "$MYSQL_HOST" "$MYSQL_PORT"
-  fi
+  backup_mysql
   exit 0
 fi
 
-MYSQL_CMD=(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
-
-# ------------------------------------------------------- Detecção do MySQL
-if "${MYSQL_CMD[@]}" -e "SELECT 1" >/dev/null 2>&1; then
-  echo "[mysql] usando MySQL do sistema em $MYSQL_HOST:$MYSQL_PORT (persistente)"
-  # Garante que o banco exista (o JDBC também cria via createDatabaseIfNotExist)
-  "${MYSQL_CMD[@]}" -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB\`" >/dev/null 2>&1 || true
-
-  # Instância isolada em /tmp agora é redundante — encerra e remove
-  if [ -S "$MYSQL_SOCKET" ] && mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1; then
-    echo "[mysql] fazendo backup da instância isolada antes de encerrá-la"
-    backup_mysql 127.0.0.1 3307
-    echo "[mysql] encerrando instância isolada ($TASKFLOW_TMP)"
-    mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot shutdown >/dev/null 2>&1 || true
-    sleep 1
-    # API antiga apontava para o banco isolado — será reiniciada no banco do sistema
-    pkill -f 'app.TaskApplication' 2>/dev/null || true
-  fi
-  if [ -d "$TASKFLOW_TMP" ] && { [ -S "$MYSQL_SOCKET" ] || [ -d "$MYSQL_DATA_DIR" ]; }; then
-    rm -rf "$TASKFLOW_TMP"
-    echo "[mysql] instância isolada removida ($TASKFLOW_TMP)"
-  fi
-else
-  echo "[mysql] sem acesso a $MYSQL_HOST:$MYSQL_PORT — usando instância isolada em /tmp"
-
-  mkdir -p "$TASKFLOW_TMP"
-  MYSQL_HOST=127.0.0.1
-  MYSQL_PORT=3307
-  MYSQL_CMD=(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
-
-  # O root local do socket pode estar sem senha (instância nova) ou com senha.
-  socket_ping() {
-    mysqladmin --socket="$MYSQL_SOCKET" -uroot ping >/dev/null 2>&1 || \
-      mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1
-  }
-
-  if ! socket_ping; then
-    if [ ! -d "$MYSQL_DATA_DIR" ]; then
-      echo "[mysql] inicializando datadir em $MYSQL_DATA_DIR"
-      mysqld --no-defaults --initialize-insecure --datadir="$MYSQL_DATA_DIR" --user="$USER"
-    fi
-
-    echo "[mysql] iniciando mysqld na porta $MYSQL_PORT"
-    setsid nohup mysqld --no-defaults --datadir="$MYSQL_DATA_DIR" \
-      --socket="$MYSQL_SOCKET" --port="$MYSQL_PORT" --bind-address=127.0.0.1 \
-      --user="$USER" --skip-networking=0 > "$MYSQL_LOG" 2>&1 < /dev/null &
-
-    for _ in $(seq 1 30); do
-      if socket_ping; then
-        break
-      fi
-      sleep 1
-    done
-
-    if ! socket_ping; then
-      echo "[mysql] falha ao iniciar. Veja $MYSQL_LOG" >&2
-      exit 1
-    fi
-  fi
-
-  # Bootstrap idempotente: bancos, usuário da aplicação e conta legada
-  if ! mysql --socket="$MYSQL_SOCKET" -uroot < "$BASE_DIR/db/schema.sql" 2>/dev/null; then
-    mysql --socket="$MYSQL_SOCKET" -uroot -proot < "$BASE_DIR/db/schema.sql" 2>/dev/null || \
-      echo "[mysql] aviso: não foi possível executar db/schema.sql (crie o usuário 'taskflow' manualmente)"
-  fi
-
-  if ! "${MYSQL_CMD[@]}" -e "SELECT 1" >/dev/null 2>&1; then
-    echo "[mysql] falha ao conectar na instância isolada com o usuário $MYSQL_USER" >&2
-    exit 1
-  fi
-  echo "[mysql] pronto (porta $MYSQL_PORT)"
-
-  # Restaura dados de um reinício anterior (o backup vive fora do /tmp)
-  restore_mysql 127.0.0.1 3307
-  # Mantém o backup sempre atualizado
-  backup_mysql 127.0.0.1 3307
-
-  echo
-  echo "[aviso] os dados estão em /tmp e seriam apagados a cada reinício do PC."
-  echo "[aviso] Para persistência real, rode UMA VEZ com a senha do sudo:"
-  echo "        cd $BASE_DIR && sudo mysql < db/schema.sql"
+# ------------------------------------------------------- Verificação do MySQL
+if ! "${MYSQL_CMD[@]}" -e "SELECT 1" >/dev/null 2>&1; then
+  echo "[mysql] ERRO: MySQL do sistema não está acessível em $MYSQL_HOST:$MYSQL_PORT com o usuário '$MYSQL_USER'." >&2
+  echo "[mysql] O TaskFlow usa exclusivamente o MySQL persistente do sistema — não há fallback em /tmp." >&2
+  echo "[mysql] Inicie o serviço MySQL, por exemplo:" >&2
+  echo "        sudo systemctl start mysql" >&2
+  echo "[mysql] E certifique-se de que o usuário '$MYSQL_USER' existe (execute uma vez):" >&2
+  echo "        cd $BASE_DIR && sudo mysql < db/schema.sql" >&2
+  exit 1
 fi
+
+echo "[mysql] usando MySQL do sistema em $MYSQL_HOST:$MYSQL_PORT (persistente)"
+# Garante que o banco exista (o JDBC também cria via createDatabaseIfNotExist)
+"${MYSQL_CMD[@]}" -e "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DB\`" >/dev/null 2>&1 || true
+
+# Mantém o backup sempre atualizado
+backup_mysql
 
 # ------------------------------------------------------------------ API
 if curl -s -m 2 -o /dev/null "http://localhost:$API_PORT/api/tasks"; then
@@ -176,13 +109,13 @@ else
   fi
 
   mvn -q -f "$BASE_DIR/pom.xml" dependency:build-classpath \
-    -Dmdep.outputFile="$TASKFLOW_TMP/cp.txt" 2>/dev/null || true
+    -Dmdep.outputFile="$CP_FILE" 2>/dev/null || true
 
   echo "[api] iniciando TaskApplication na porta $API_PORT"
   cd "$BASE_DIR"
-  CP="target/classes:$(cat "$TASKFLOW_TMP/cp.txt" 2>/dev/null || true)"
+  CP="target/classes:$(cat "$CP_FILE" 2>/dev/null || true)"
   MYSQL_HOST="$MYSQL_HOST" MYSQL_PORT="$MYSQL_PORT" MYSQL_DB="$MYSQL_DB" \
-    MYSQL_USER="$MYSQL_USER" MYSQL_PASSWORD="$MYSQL_PASSWORD" \
+    MYSQL_USER="$MYSQL_USER" MYSQL_PASSWORD="$MYSQL_PASSWORD" JWT_SECRET="$JWT_SECRET" \
     setsid nohup java -cp "$CP" app.TaskApplication > "$API_LOG" 2>&1 < /dev/null &
 
   for _ in $(seq 1 30); do
@@ -202,3 +135,4 @@ fi
 echo
 echo "Frontend : http://localhost:5501/web/pages/login.html"
 echo "API      : http://localhost:$API_PORT"
+echo "MySQL    : $MYSQL_HOST:$MYSQL_PORT (banco $MYSQL_DB, usuário $MYSQL_USER)"
