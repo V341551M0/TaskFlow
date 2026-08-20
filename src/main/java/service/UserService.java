@@ -18,11 +18,11 @@ public class UserService {
         if (normalizedName.isBlank()) {
             throw new IllegalArgumentException("Informe um nome de usuário.");
         }
-        if (normalizedEmail.isBlank()) {
-            throw new IllegalArgumentException("Informe um e-mail.");
+        if (!isValidEmail(normalizedEmail)) {
+            throw new IllegalArgumentException("Informe um e-mail válido.");
         }
-        if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("Informe uma senha.");
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres.");
         }
 
         UserDto existing = repository.findByIdentifier(normalizedEmail);
@@ -34,6 +34,18 @@ public class UserService {
         }
 
         return repository.save(normalizedName, normalizedEmail, PasswordUtil.hash(password));
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 0 || atIndex != email.lastIndexOf('@')) {
+            return false;
+        }
+        String domain = email.substring(atIndex + 1);
+        return domain.contains(".") && !domain.startsWith(".") && !domain.endsWith(".");
     }
 
     public UserDto login(String identifier, String password) {

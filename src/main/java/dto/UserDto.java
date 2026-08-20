@@ -1,5 +1,7 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class UserDto {
     private String id;
     private String username;
@@ -30,6 +32,7 @@ public class UserDto {
         return date;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }

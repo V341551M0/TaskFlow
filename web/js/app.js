@@ -4,6 +4,7 @@
 const API_BASE_URL = 'http://localhost:8080';
 const STORAGE_KEY = 'taskflow-state';
 const AUTH_KEY = 'taskflow-auth';
+const TOKEN_KEY = 'taskflow-token';
 
 document.addEventListener('DOMContentLoaded', function () {
   if (!requireAuth()) {
@@ -16,10 +17,28 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function requireAuth() {
-  if (localStorage.getItem(AUTH_KEY) === 'true') {
+  if (localStorage.getItem(AUTH_KEY) === 'true' && localStorage.getItem(TOKEN_KEY)) {
     return true;
   }
   window.location.replace(getLoginUrl());
+  return false;
+}
+
+function getAuthHeaders() {
+  const token = localStorage.getItem(TOKEN_KEY) || '';
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + token
+  };
+}
+
+function handleUnauthorized(response) {
+  if (response && response.status === 401) {
+    localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    window.location.replace(getLoginUrl());
+    return true;
+  }
   return false;
 }
 
@@ -28,6 +47,7 @@ function attachLogout() {
     button.addEventListener('click', function (event) {
       event.preventDefault();
       localStorage.removeItem(AUTH_KEY);
+      localStorage.removeItem(TOKEN_KEY);
       window.location.href = getLoginUrl();
     });
   });
@@ -155,9 +175,13 @@ function attachCreateModal() {
       try {
         const resposta = await fetch(endpoint, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(),
           body: JSON.stringify(dados)
         });
+
+        if (handleUnauthorized(resposta)) {
+          return;
+        }
 
         if (resposta.ok) {
           closeTaskModal();
@@ -178,7 +202,12 @@ function attachCreateModal() {
 
 async function loadItems() {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard`);
+    const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
+      headers: getAuthHeaders()
+    });
+    if (handleUnauthorized(response)) {
+      return;
+    }
     if (!response.ok) {
       throw new Error('Falha ao carregar dashboard');
     }
@@ -281,9 +310,13 @@ async function deleteItem(id, type) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/api/delete`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ id, type })
     });
+
+    if (handleUnauthorized(resposta)) {
+      return;
+    }
 
     if (resposta.ok) {
       await loadItems();
@@ -338,9 +371,13 @@ async function setItemStatus(id, type, date, action) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/api/complete`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ id, type, date, status })
     });
+
+    if (handleUnauthorized(resposta)) {
+      return;
+    }
 
     if (resposta.ok) {
       await loadItems();

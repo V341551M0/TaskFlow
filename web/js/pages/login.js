@@ -3,6 +3,7 @@
 */
 const API_BASE_URL = 'http://localhost:8080';
 const AUTH_KEY = 'taskflow-auth';
+const TOKEN_KEY = 'taskflow-token';
 const USER_KEY = 'taskflow-user';
 const HOME_URL = '../index.html';
 
@@ -85,6 +86,7 @@ async function authenticate(endpoint, payload, fallbackMessage) {
 
     if (response.ok) {
       localStorage.setItem(AUTH_KEY, 'true');
+      localStorage.setItem(TOKEN_KEY, data.token || '');
       localStorage.setItem(USER_KEY, JSON.stringify({
         id: data.id,
         username: data.username,

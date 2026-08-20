@@ -1,17 +1,20 @@
 package controller;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import dto.TaskDto;
 import service.TaskService;
+import util.AuthContext;
+import util.AuthFilter;
+import util.Http;
 import util.Json;
 
 public class TaskController {
@@ -21,14 +24,19 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    public void registerRoutes(HttpServer server) {
-        server.createContext("/api/tasks", this::handleTasks);
-        server.createContext("/api/habits", this::handleHabits);
-        server.createContext("/api/recurring-tasks", this::handleRecurringTasks);
-        server.createContext("/api/complete", this::handleComplete);
-        server.createContext("/api/delete", this::handleDelete);
-        server.createContext("/api/dashboard", this::handleDashboard);
-        server.createContext("/api/heatmap", this::handleHeatmap);
+    public void registerRoutes(HttpServer server, AuthFilter authFilter) {
+        createContext(server, authFilter, "/api/tasks", this::handleTasks);
+        createContext(server, authFilter, "/api/habits", this::handleHabits);
+        createContext(server, authFilter, "/api/recurring-tasks", this::handleRecurringTasks);
+        createContext(server, authFilter, "/api/complete", this::handleComplete);
+        createContext(server, authFilter, "/api/delete", this::handleDelete);
+        createContext(server, authFilter, "/api/dashboard", this::handleDashboard);
+        createContext(server, authFilter, "/api/heatmap", this::handleHeatmap);
+    }
+
+    private void createContext(HttpServer server, AuthFilter authFilter, String path, HttpHandler handler) {
+        HttpContext context = server.createContext(path, handler);
+        context.getFilters().add(authFilter);
     }
 
     private void handleTasks(HttpExchange exchange) throws IOException {
@@ -44,128 +52,121 @@ public class TaskController {
     }
 
     private void handleComplete(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            sendCors(exchange, 204);
+        if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+            Http.sendCors(exchange, 204);
             return;
         }
 
-        if ("POST".equalsIgnoreCase(method)) {
-            String body = readBody(exchange);
-            Map<String, String> data = Json.parseObject(body);
-            String status = data.get("status");
-            TaskDto updated;
+        if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            String userId = AuthContext.userId();
             try {
+                Map<String, Object> data = Json.parseObject(Http.readBody(exchange));
+                String status = stringValue(data.get("status"));
+                TaskDto updated;
                 if (status != null && !status.isBlank()) {
-                    updated = taskService.updateStatus(data.get("id"), data.get("type"), data.get("date"), status);
+                    updated = taskService.updateStatus(userId, stringValue(data.get("id")), stringValue(data.get("type")), stringValue(data.get("date")), status);
                 } else {
-                    updated = taskService.toggleCompletion(data.get("id"), data.get("type"), data.get("date"));
+                    updated = taskService.toggleCompletion(userId, stringValue(data.get("id")), stringValue(data.get("type")), stringValue(data.get("date")));
                 }
                 if (updated == null) {
-                    sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+                    Http.sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
                     return;
                 }
-                sendJson(exchange, 200, updated);
+                Http.sendJson(exchange, 200, updated);
                 return;
             } catch (IllegalStateException ex) {
-                sendJson(exchange, 400, Map.of("message", ex.getMessage()));
+                Http.sendJson(exchange, 400, Map.of("message", ex.getMessage()));
+                return;
+            } catch (IllegalArgumentException ex) {
+                Http.sendJson(exchange, 400, Map.of("message", ex.getMessage()));
                 return;
             }
         }
 
-        sendJson(exchange, 405, Map.of("message", "Method not allowed"));
+        Http.sendJson(exchange, 405, Map.of("message", "Method not allowed"));
     }
 
     private void handleDelete(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            sendCors(exchange, 204);
+        if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+            Http.sendCors(exchange, 204);
             return;
         }
 
-        if ("POST".equalsIgnoreCase(method)) {
-            String body = readBody(exchange);
-            Map<String, String> data = Json.parseObject(body);
-            TaskDto deleted = taskService.deleteItem(data.get("id"), data.get("type"));
-            if (deleted == null) {
-                sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+        if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            String userId = AuthContext.userId();
+            try {
+                Map<String, Object> data = Json.parseObject(Http.readBody(exchange));
+                TaskDto deleted = taskService.deleteItem(userId, stringValue(data.get("id")), stringValue(data.get("type")));
+                if (deleted == null) {
+                    Http.sendJson(exchange, 404, Map.of("message", "Item não encontrado"));
+                    return;
+                }
+                Http.sendJson(exchange, 200, deleted);
+                return;
+            } catch (IllegalArgumentException ex) {
+                Http.sendJson(exchange, 400, Map.of("message", ex.getMessage()));
                 return;
             }
-            sendJson(exchange, 200, deleted);
-            return;
         }
 
-        sendJson(exchange, 405, Map.of("message", "Method not allowed"));
+        Http.sendJson(exchange, 405, Map.of("message", "Method not allowed"));
     }
 
     private void handleDashboard(HttpExchange exchange) throws IOException {
+        String userId = AuthContext.userId();
         Map<String, Object> payload = new HashMap<>();
-        payload.put("tasks", taskService.listTasks());
-        payload.put("habits", taskService.listHabits());
-        payload.put("recurringTasks", taskService.listRecurringTasks());
-        payload.put("heatmap", taskService.getDailyHeatmap());
-        sendJson(exchange, 200, payload);
+        payload.put("tasks", taskService.listTasks(userId));
+        payload.put("habits", taskService.listHabits(userId));
+        payload.put("recurringTasks", taskService.listRecurringTasks(userId));
+        payload.put("heatmap", taskService.getDailyHeatmap(userId));
+        Http.sendJson(exchange, 200, payload);
     }
 
     private void handleHeatmap(HttpExchange exchange) throws IOException {
         if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendCors(exchange, 204);
+            Http.sendCors(exchange, 204);
             return;
         }
-        sendJson(exchange, 200, taskService.getDailyHeatmap());
+        Http.sendJson(exchange, 200, taskService.getDailyHeatmap(AuthContext.userId()));
     }
 
     private void handleItemRequest(HttpExchange exchange, String type) throws IOException {
         String method = exchange.getRequestMethod();
         if ("OPTIONS".equalsIgnoreCase(method)) {
-            sendCors(exchange, 204);
+            Http.sendCors(exchange, 204);
             return;
         }
 
         if ("GET".equalsIgnoreCase(method)) {
+            String userId = AuthContext.userId();
             List<TaskDto> items = switch (type) {
-                case "habit" -> taskService.listHabits();
-                case "recurring" -> taskService.listRecurringTasks();
-                default -> taskService.listTasks();
+                case "habit" -> taskService.listHabits(userId);
+                case "recurring" -> taskService.listRecurringTasks(userId);
+                default -> taskService.listTasks(userId);
             };
-            sendJson(exchange, 200, items);
+            Http.sendJson(exchange, 200, items);
             return;
         }
 
         if ("POST".equalsIgnoreCase(method)) {
-            String body = readBody(exchange);
-            Map<String, String> data = Json.parseObject(body);
-            TaskDto created = taskService.createItem(type, data);
-            sendJson(exchange, 201, created);
+            String userId = AuthContext.userId();
+            try {
+                Map<String, Object> data = Json.parseObject(Http.readBody(exchange));
+                TaskDto created = taskService.createItem(userId, type, data);
+                Http.sendJson(exchange, 201, created);
+            } catch (IllegalArgumentException ex) {
+                Http.sendJson(exchange, 400, Map.of("message", ex.getMessage()));
+            }
             return;
         }
 
-        sendJson(exchange, 405, Map.of("message", "Method not allowed"));
+        Http.sendJson(exchange, 405, Map.of("message", "Method not allowed"));
     }
 
-    private String readBody(HttpExchange exchange) throws IOException {
-        InputStream inputStream = exchange.getRequestBody();
-        byte[] bytes = inputStream.readAllBytes();
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
-    private void sendCors(HttpExchange exchange, int statusCode) throws IOException {
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
-        exchange.sendResponseHeaders(statusCode, -1);
-        exchange.close();
-    }
-
-    private void sendJson(HttpExchange exchange, int statusCode, Object body) throws IOException {
-        String payload = Json.toJson(body);
-        byte[] response = payload.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
-        exchange.sendResponseHeaders(statusCode, response.length);
-        exchange.getResponseBody().write(response);
-        exchange.close();
+    private String stringValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        return String.valueOf(value);
     }
 }

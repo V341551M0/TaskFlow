@@ -3,6 +3,7 @@ package app;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -10,6 +11,7 @@ import controller.AuthController;
 import controller.TaskController;
 import service.TaskService;
 import service.UserService;
+import util.AuthFilter;
 
 public class TaskApplication {
     public static void main(String[] args) throws Exception {
@@ -17,11 +19,14 @@ public class TaskApplication {
         int basePort = Integer.parseInt(configuredPort);
 
         HttpServer server = startServer(basePort);
+        AuthFilter authFilter = new AuthFilter();
+
         TaskController controller = new TaskController(new TaskService());
         AuthController authController = new AuthController(new UserService());
-        controller.registerRoutes(server);
-        authController.registerRoutes(server);
-        server.setExecutor(null);
+        controller.registerRoutes(server, authFilter);
+        authController.registerRoutes(server, authFilter);
+
+        server.setExecutor(Executors.newCachedThreadPool());
         server.start();
 
         System.out.println("TaskFlow API running at http://localhost:" + server.getAddress().getPort());

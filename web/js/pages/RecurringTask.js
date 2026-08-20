@@ -65,7 +65,16 @@ async function colorirHeatmap(dadosCarregados) {
 
 async function carregarHeatmap() {
     try {
-        const resposta = await fetch('http://localhost:8080/api/heatmap');
+        const token = localStorage.getItem('taskflow-token') || '';
+        const resposta = await fetch('http://localhost:8080/api/heatmap', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (resposta.status === 401) {
+            localStorage.removeItem('taskflow-auth');
+            localStorage.removeItem('taskflow-token');
+            window.location.replace('login.html');
+            return {};
+        }
         if (resposta.ok) {
             return await resposta.json();
         }

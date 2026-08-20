@@ -7,6 +7,7 @@ public class TaskDto {
     private boolean allDays;
     private String frequencyPerDay;
     private String type;
+    private String userId;
     private boolean completedToday;
     private int completionCount;
     private String status;
@@ -47,6 +48,14 @@ public class TaskDto {
 
     public String getType() {
         return type;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean isCompletedToday() {
