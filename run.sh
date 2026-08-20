@@ -21,6 +21,8 @@ MYSQL_SOCKET="$TASKFLOW_TMP/mysql.sock"
 MYSQL_LOG="$TASKFLOW_TMP/mysqld.log"
 API_PORT="${API_PORT:-8080}"
 API_LOG="$TASKFLOW_TMP/api.log"
+BACKUP_DIR="${TASKFLOW_BACKUP_DIR:-$HOME/.taskflow}"
+BACKUP_FILE="$BACKUP_DIR/taskflow_db.sql.gz"
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Credenciais configuráveis (mesmas usadas por util/DatabaseConnection)
@@ -40,6 +42,8 @@ if "${MYSQL_CMD[@]}" -e "SELECT 1" >/dev/null 2>&1; then
 
   # Instância isolada em /tmp agora é redundante — encerra e remove
   if [ -S "$MYSQL_SOCKET" ] && mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1; then
+    echo "[mysql] fazendo backup da instância isolada antes de encerrá-la"
+    backup_mysql 127.0.0.1 3307
     echo "[mysql] encerrando instância isolada ($TASKFLOW_TMP)"
     mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot shutdown >/dev/null 2>&1 || true
     sleep 1
@@ -56,7 +60,56 @@ else
   mkdir -p "$TASKFLOW_TMP"
   MYSQL_HOST=127.0.0.1
   MYSQL_PORT=3307
-  MYSQL_CMD=(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
+MYSQL_CMD=(mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
+
+# ------------------------------------------------------------- Backup/Restore
+# Cria um dump do banco em $BACKUP_FILE (fora do /tmp) sempre que houver dados.
+backup_mysql() {
+  local host="$1" port="$2"
+  local cmd=(mysql -h"$host" -P"$port" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
+  local tables
+  tables="$("${cmd[@]}" -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='$MYSQL_DB'" 2>/dev/null || true)"
+  if [ "${tables:-0}" = "0" ]; then
+    return 0
+  fi
+
+  mkdir -p "$BACKUP_DIR"
+  if mysqldump -h"$host" -P"$port" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" \
+      --single-transaction "$MYSQL_DB" 2>/dev/null | gzip > "$BACKUP_FILE.tmp"; then
+    if [ -s "$BACKUP_FILE.tmp" ]; then
+      mv "$BACKUP_FILE.tmp" "$BACKUP_FILE"
+      echo "[backup] banco salvo em $BACKUP_FILE"
+    else
+      rm -f "$BACKUP_FILE.tmp"
+    fi
+  else
+    rm -f "$BACKUP_FILE.tmp"
+  fi
+}
+
+# Se o banco está vazio e existe um backup, restaura os dados (sobrevive a reinícios).
+restore_mysql() {
+  local host="$1" port="$2"
+  local cmd=(mysql -h"$host" -P"$port" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD")
+  [ -f "$BACKUP_FILE" ] || return 0
+
+  local has_users
+  has_users="$("${cmd[@]}" -N -e "SELECT COUNT(*) FROM \`$MYSQL_DB\`.usuario" 2>/dev/null || true)"
+  [ "${has_users:-0}" != "0" ] && return 0
+
+  echo "[backup] banco vazio — restaurando $BACKUP_FILE"
+  gunzip -c "$BACKUP_FILE" | "${cmd[@]}" "$MYSQL_DB" >/dev/null 2>&1 || echo "[backup] falha ao restaurar"
+}
+
+# Modo "backup": usado pelo systemd no encerramento (ExecStop).
+if [ "${1:-}" = "backup" ]; then
+  if mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1; then
+    backup_mysql 127.0.0.1 3307
+  else
+    backup_mysql "$MYSQL_HOST" "$MYSQL_PORT"
+  fi
+  exit 0
+fi
 
   if ! mysqladmin --socket="$MYSQL_SOCKET" -uroot -proot ping >/dev/null 2>&1; then
     if [ ! -d "$MYSQL_DATA_DIR" ]; then
@@ -95,6 +148,16 @@ SQL
     exit 1
   fi
   echo "[mysql] pronto (porta $MYSQL_PORT)"
+
+  # Restaura dados de um reinício anterior (o backup vive fora do /tmp)
+  restore_mysql 127.0.0.1 3307
+  # Mantém o backup sempre atualizado
+  backup_mysql 127.0.0.1 3307
+
+  echo
+  echo "[aviso] os dados estão em /tmp e seriam apagados a cada reinício do PC."
+  echo "[aviso] Para persistência real, rode UMA VEZ com a senha do sudo:"
+  echo "        cd $BASE_DIR && sudo mysql < db/schema.sql"
 fi
 
 # ------------------------------------------------------------------ API

@@ -39,7 +39,6 @@ CREATE TABLE IF NOT EXISTS recurring_task (
     completion_count INT NOT NULL DEFAULT 0,
     status VARCHAR(64) NOT NULL DEFAULT 'pending'
 );
-
 CREATE TABLE IF NOT EXISTS usuario (
     id VARCHAR(64) NOT NULL PRIMARY KEY,
     email VARCHAR(64) NOT NULL,
