@@ -263,7 +263,9 @@ public class TaskRepository {
     }
 
     private TaskDto findById(Connection connection, String userId, String type, String id) throws SQLException {
-        String sql = "SELECT * FROM %s WHERE id = ? AND user_id = ?".formatted(tableForType(type));
+        // FOR UPDATE: dentro de transação, trava a linha do item para que duas
+        // conclusões/edições concorrentes não passem juntas pelo guard de status.
+        String sql = "SELECT * FROM %s WHERE id = ? AND user_id = ? FOR UPDATE".formatted(tableForType(type));
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, id);
             statement.setString(2, userId);
@@ -342,44 +344,32 @@ public class TaskRepository {
     }
 
     private void adjustHeatmap(Connection connection, String userId, String date, int delta) throws SQLException {
-        int current = getHeatmapValue(connection, userId, date);
-        int next = current + delta;
-
-        if (next == 0) {
-            String deleteSql = "DELETE FROM daily_heatmap WHERE date = ? AND user_id = ?";
-            try (PreparedStatement statement = connection.prepareStatement(deleteSql)) {
-                statement.setString(1, date);
-                statement.setString(2, userId);
-                statement.executeUpdate();
-            }
+        if (delta == 0) {
             return;
         }
 
+        // Incremento atômico: o lock de linha da PK (user_id, date) serializa
+        // concorrentes — não há leitura+escrita separadas que percam updates.
         String upsertSql = """
                 INSERT INTO daily_heatmap (date, value, user_id)
                 VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE value = VALUES(value)
+                ON DUPLICATE KEY UPDATE value = value + ?
                 """;
         try (PreparedStatement statement = connection.prepareStatement(upsertSql)) {
             statement.setString(1, date);
-            statement.setInt(2, next);
+            statement.setInt(2, delta);
             statement.setString(3, userId);
+            statement.setInt(4, delta);
             statement.executeUpdate();
         }
-    }
 
-    private int getHeatmapValue(Connection connection, String userId, String date) throws SQLException {
-        String sql = "SELECT value FROM daily_heatmap WHERE date = ? AND user_id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        // Remove a linha que voltou a zero (só se realmente estiver em 0).
+        String deleteSql = "DELETE FROM daily_heatmap WHERE date = ? AND user_id = ? AND value = 0";
+        try (PreparedStatement statement = connection.prepareStatement(deleteSql)) {
             statement.setString(1, date);
             statement.setString(2, userId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt("value");
-                }
-            }
+            statement.executeUpdate();
         }
-        return 0;
     }
 
     private TaskDto mapRowToDto(ResultSet resultSet, String type) throws SQLException {

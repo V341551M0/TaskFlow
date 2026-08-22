@@ -1,7 +1,8 @@
 /*
     Lógica da tela de login/cadastro e comunicação com o backend Java/MySQL
 */
-const API_BASE_URL = 'http://localhost:8080';
+// URL da API definida em web/config.js (window.TASKFLOW_API_URL) — por ambiente.
+const API_BASE_URL = window.TASKFLOW_API_URL || '';
 const AUTH_KEY = 'taskflow-auth';
 const TOKEN_KEY = 'taskflow-token';
 const USER_KEY = 'taskflow-user';

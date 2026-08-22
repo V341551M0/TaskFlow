@@ -3,7 +3,9 @@
 <head>
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta http-equiv='Content-Security-Policy' content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080 http://127.0.0.1:8080">
     <title>Tarefas</title>
+    <script src="../../web/config.js"></script>
     <link rel="stylesheet" href="../../web/css/pages/layoutTK.css">
     <script src="../../web/js/pages/Task.js" defer></script>
 </head>
@@ -20,7 +22,7 @@
             </nav>
             <!--Botões de Criação-->
             <nav class="new-class-button">
-                <button type="button" id="btn-nova-tarefa" onclick="openTaskModal()">Criar nova Tarefa</button>
+                <button type="button" id="btn-nova-tarefa">Criar nova Tarefa</button>
             </nav>
         </div>    
 
@@ -49,7 +51,7 @@
         <!-- Modal (janela de criação)-->
          <div id="modal-task" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="cose-btn" onclick="closeTaskModal()">&times;</span>
+                <span class="cose-btn">&times;</span>
                 <h2>Criar Tarefa</h2>
                 <p class="modal-subtitle">Cadastre uma nova tarefa e acompanhe seu progresso no painel.</p>
 

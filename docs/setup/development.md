@@ -65,7 +65,7 @@ O frontend é estático. Com o Live Server do VS Code:
 2. Acesse `http://127.0.0.1:5501/web/pages/login.html`.
 3. Cadastre um usuário — o e-mail vira o login — e entre na tela inicial.
 
-> O frontend chama a API em `http://localhost:8080`. O backend já envia os cabeçalhos CORS necessários.
+> A URL da API é definida em `web/config.js` (`window.TASKFLOW_API_URL`): em desenvolvimento aponta para `http://localhost:8080`; em produção, mantenha vazio (mesma origem) ou aponte para o backend. Todas as páginas aplicam CSP e o backend restringe o CORS às origens em `CORS_ALLOWED_ORIGINS` (padrão dev: `http://localhost:5501` e `http://127.0.0.1:5501`).
 
 ## Variáveis de ambiente
 
@@ -89,7 +89,9 @@ Os mesmos padrões são usados por `run.sh` e por `util/DatabaseConnection`.
 JWT_SECRET=$(openssl rand -hex 32) mvn test
 ```
 
-> **Atenção:** a suíte usa o banco `taskflow_test` (variável `MYSQL_DB=taskflow_test` configurada no surefire) e limpa as tabelas a cada teste. O usuário `taskflow` precisa ter acesso a esse banco — ele é criado por `db/schema.sql`. O `JWT_SECRET` é repassado pelo surefire a partir do ambiente — exporte-a (como acima) para os testes que exercitam a autenticação.
+> **Atenção:** a suíte usa o banco `taskflow_test` (variável `MYSQL_DB=taskflow_test` configurada no surefire) e limpa as tabelas a cada teste (centralizado em `util.TestDbSupport`). O usuário `taskflow` precisa ter acesso a esse banco — ele é criado por `db/schema.sql`. O `JWT_SECRET` é repassado pelo surefire a partir do ambiente — exporte-a (como acima) para os testes que exercitam a autenticação.
+
+> **CI / isolamento:** para garantir isolamento total entre suíte e base de desenvolvimento, o ideal é rodar os testes contra um MySQL via **Testcontainers** (exige o usuário no grupo `docker`). Enquanto o ambiente local não tiver esse acesso, os testes usam o banco dedicado `taskflow_test`, limpo por teste. Detalhes em [migrations.md](../database/migrations.md).
 
 ## Estrutura do projeto
 

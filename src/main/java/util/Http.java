@@ -7,6 +7,15 @@ import java.nio.charset.StandardCharsets;
 import com.sun.net.httpserver.HttpExchange;
 
 public final class Http {
+    private static final java.util.Set<String> ALLOWED_ORIGINS = java.util.Set.copyOf(
+            java.util.Arrays.stream(getEnvOrDefault("CORS_ALLOWED_ORIGINS",
+                            "http://localhost:5501,http://127.0.0.1:5501")
+                    .split(","))
+                    .map(String::trim)
+                    .filter(origin -> !origin.isBlank())
+                    .toList()
+    );
+
     private Http() {
     }
 
@@ -32,10 +41,25 @@ public final class Http {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    /**
+     * CORS restrito às origens permitidas (variável CORS_ALLOWED_ORIGINS,
+     * lista separada por vírgula). Apenas a origem da requisição, se permitida,
+     * é refletida em Access-Control-Allow-Origin — nunca "*".
+     */
     public static void addCors(HttpExchange exchange) {
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        String origin = exchange.getRequestHeaders().getFirst("Origin");
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", origin);
+            exchange.getResponseHeaders().add("Vary", "Origin");
+        }
         exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
         exchange.getResponseHeaders().add("Access-Control-Expose-Headers", "Authorization");
+        exchange.getResponseHeaders().add("Access-Control-Max-Age", "86400");
+    }
+
+    private static String getEnvOrDefault(String name, String defaultValue) {
+        String value = System.getenv(name);
+        return (value != null && !value.isBlank()) ? value : defaultValue;
     }
 }

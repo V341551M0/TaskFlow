@@ -4,8 +4,12 @@
 
 ```
 usuario
-  │
-  └── (sem vínculo físico por foreign key com os itens hoje)
+  │  (user_id com FOREIGN KEY, ON DELETE CASCADE)
+  ├── task
+  ├── habit
+  ├── recurring_task
+  ├── item_history
+  └── daily_heatmap
 
 task ───────────── item_history ───────────── daily_heatmap
 habit ───────────── item_history ───────────── daily_heatmap
@@ -28,24 +32,11 @@ task (id=abc, vezes_ao_dia=2) ──conclui em 2026-08-16──►
 
 ## Usuários e atividades
 
-No estado atual, **as atividades não possuem `user_id`**: tarefas, hábitos e tarefas recorrentes são globais ao banco. A tabela `usuario` é usada apenas para autenticação (login/cadastro).
+Cada atividade pertence a um usuário: as tabelas `task`, `habit`, `recurring_task`, `item_history` e `daily_heatmap` possuem `user_id` com `FOREIGN KEY` para `usuario` (`ON DELETE CASCADE`). Todas as consultas do repositório filtram por `user_id` do usuário autenticado (`AuthContext`), garantindo **isolamento total entre contas** — um usuário nunca vê nem altera atividades de outro.
 
-Isso é uma limitação conhecida e uma evolução natural:
+## Foreign keys
 
-```
-User 1 ─────── N Task       (almejado)
-User 1 ─────── N Habit
-User 1 ─────── N RecurringTask
-```
-
-Para implementar, bastaria adicionar `user_id` às três tabelas de itens e filtrar as consultas pelo usuário autenticado.
-
-## Ausência de foreign keys
-
-O schema atual não declara `FOREIGN KEY` (as referências são lógicas). Opções de evolução:
-
-- Adicionar restrições de integridade com `ON DELETE CASCADE` (por exemplo, apagar histórico ao apagar o item).
-- Migrar para uma ferramenta de migrações (ver [migrations.md](migrations.md)).
+O schema (migração `V1__create_tables.sql`) declara `FOREIGN KEY` com `ON DELETE CASCADE` de todas as tabelas para `usuario` (e de `item_history`/`daily_heatmap` para as atividades via `item_id` lógico).
 
 ## Regras de manutenção do heatmap
 

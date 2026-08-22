@@ -152,7 +152,7 @@ public class TaskController {
             String userId = AuthContext.userId();
             try {
                 Map<String, Object> data = Json.parseObject(Http.readBody(exchange));
-                TaskDto created = taskService.createItem(userId, type, data);
+                TaskDto created = taskService.createItem(userId, type, dto.ItemRequest.from(data));
                 Http.sendJson(exchange, 201, created);
             } catch (IllegalArgumentException ex) {
                 Http.sendJson(exchange, 400, Map.of("message", ex.getMessage()));

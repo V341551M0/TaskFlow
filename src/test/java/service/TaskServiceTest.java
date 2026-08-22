@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import dto.ItemRequest;
 import dto.TaskDto;
 import dto.UserDto;
 import util.DatabaseConnection;
+import util.TestDbSupport;
 
 public class TaskServiceTest {
     private TaskService service;
@@ -19,7 +21,7 @@ public class TaskServiceTest {
     @BeforeEach
     void setUp() {
         DatabaseConnection.initialize();
-        clearTables();
+        TestDbSupport.clearTables();
 
         UserDto user = new UserService().register("teste", "teste@taskflow.test", "senha123");
         userId = user.getId();
@@ -27,28 +29,14 @@ public class TaskServiceTest {
         service = new TaskService();
     }
 
-    private void clearTables() {
-        try (var connection = DatabaseConnection.getConnection();
-             var statement = connection.createStatement()) {
-            statement.execute("DELETE FROM item_history");
-            statement.execute("DELETE FROM daily_heatmap");
-            statement.execute("DELETE FROM task");
-            statement.execute("DELETE FROM habit");
-            statement.execute("DELETE FROM recurring_task");
-            statement.execute("DELETE FROM usuario");
-        } catch (Exception ex) {
-            throw new IllegalStateException("Não foi possível limpar as tabelas de teste", ex);
-        }
-    }
-
     @Test
     void shouldCreateItemAndUpdateDailyHeatmapWhenCompleted() {
-        TaskDto created = service.createItem(userId, "habit", Map.of(
+        TaskDto created = service.createItem(userId, "habit", ItemRequest.from(Map.of(
                 "nome", "Beber água",
                 "data", "2026-08-07",
                 "todosOsDias", "true",
                 "vezesAoDia", "2"
-        ));
+        )));
 
         assertTrue(service.listHabits(userId).stream().anyMatch(item -> "Beber água".equals(item.getName())));
         assertEquals("Beber água", created.getName());
@@ -64,12 +52,12 @@ public class TaskServiceTest {
 
     @Test
     void shouldDeleteItemFromTheCorrectList() {
-        TaskDto created = service.createItem(userId, "task", Map.of(
+        TaskDto created = service.createItem(userId, "task", ItemRequest.from(Map.of(
                 "nome", "Remover depois",
                 "data", "2026-08-07",
                 "todosOsDias", "false",
                 "vezesAoDia", "1"
-        ));
+        )));
 
         TaskDto deleted = service.deleteItem(userId, created.getId(), "task");
 
@@ -79,12 +67,12 @@ public class TaskServiceTest {
 
     @Test
     void shouldPreventStatusChangeWhenAlreadyFinalized() {
-        TaskDto created = service.createItem(userId, "task", Map.of(
+        TaskDto created = service.createItem(userId, "task", ItemRequest.from(Map.of(
                 "nome", "Validar fluxo",
                 "data", "2026-08-07",
                 "todosOsDias", "false",
                 "vezesAoDia", "2"
-        ));
+        )));
 
         service.updateStatus(userId, created.getId(), "task", "2026-08-07", "completed");
 
@@ -99,12 +87,12 @@ public class TaskServiceTest {
 
     @Test
     void shouldRemoveHeatmapHistoryWhenItemIsDeleted() {
-        TaskDto created = service.createItem(userId, "habit", Map.of(
+        TaskDto created = service.createItem(userId, "habit", ItemRequest.from(Map.of(
                 "nome", "Remover histórico",
                 "data", "2026-08-07",
                 "todosOsDias", "false",
                 "vezesAoDia", "3"
-        ));
+        )));
 
         service.updateStatus(userId, created.getId(), "habit", "2026-08-07", "completed");
         service.deleteItem(userId, created.getId(), "habit");
@@ -115,12 +103,12 @@ public class TaskServiceTest {
 
     @Test
     void shouldRemoveHeatmapHistoryWhenRecurringTaskIsDeletedAfterToggle() {
-        TaskDto created = service.createItem(userId, "recurring", Map.of(
+        TaskDto created = service.createItem(userId, "recurring", ItemRequest.from(Map.of(
                 "nome", "Recorrente Teste",
                 "data", "2026-08-10",
                 "todosOsDias", "true",
                 "vezesAoDia", "2"
-        ));
+        )));
 
         service.toggleCompletion(userId, created.getId(), "recurring", "2026-08-10");
         assertEquals(2, service.getDailyHeatmap(userId).get("2026-08-10"));
@@ -132,12 +120,12 @@ public class TaskServiceTest {
 
     @Test
     void shouldNotExposeItemsOfAnotherUser() {
-        TaskDto created = service.createItem(userId, "task", Map.of(
+        TaskDto created = service.createItem(userId, "task", ItemRequest.from(Map.of(
                 "nome", "Item privado",
                 "data", "2026-08-07",
                 "todosOsDias", "false",
                 "vezesAoDia", "1"
-        ));
+        )));
 
         UserDto otherUser = new UserService().register("outro", "outro@taskflow.test", "senha123");
         TaskService otherService = new TaskService();
@@ -145,5 +133,32 @@ public class TaskServiceTest {
         assertTrue(otherService.listTasks(otherUser.getId()).stream()
                 .noneMatch(item -> created.getId().equals(item.getId())));
         assertEquals(null, otherService.findItemById(otherUser.getId(), created.getId(), "task"));
+    }
+
+    @Test
+    void shouldLeaveNoSideEffectsWhenFinalizedItemRejectsNewStatus() {
+        TaskDto created = service.createItem(userId, "habit", ItemRequest.from(Map.of(
+                "nome", "Sem efeitos colaterais",
+                "data", "2026-08-07",
+                "todosOsDias", "false",
+                "vezesAoDia", "2"
+        )));
+
+        service.updateStatus(userId, created.getId(), "habit", "2026-08-07", "completed");
+        assertEquals(2, service.getDailyHeatmap(userId).get("2026-08-07"));
+
+        // Item finalizado: nova mudança de status e novo toggle devem falhar
+        // sem alterar heatmap/histórico/contagem.
+        assertThrows(IllegalStateException.class, () ->
+                service.updateStatus(userId, created.getId(), "habit", "2026-08-07", "failed"));
+        assertThrows(IllegalStateException.class, () ->
+                service.toggleCompletion(userId, created.getId(), "habit", "2026-08-07"));
+
+        TaskDto updated = service.findItemById(userId, created.getId(), "habit");
+        assertEquals("completed", updated.getStatus());
+        assertEquals(2, updated.getCompletionCount());
+        assertEquals(2, service.getDailyHeatmap(userId).get("2026-08-07"));
+        assertTrue(updated.getHistory().containsKey("2026-08-07"));
+        assertEquals(2, updated.getHistory().get("2026-08-07"));
     }
 }

@@ -1,10 +1,25 @@
 /*
     Lógica da web e comunicação com o backend
 */
-const API_BASE_URL = 'http://localhost:8080';
+// URL da API definida em web/config.js (window.TASKFLOW_API_URL) — por ambiente.
+const API_BASE_URL = window.TASKFLOW_API_URL || '';
 const STORAGE_KEY = 'taskflow-state';
 const AUTH_KEY = 'taskflow-auth';
 const TOKEN_KEY = 'taskflow-token';
+
+/**
+ * Cliente HTTP centralizado: prefixa a URL da API, anexa o token JWT e
+ * trata 401 (encerra a sessão e redireciona para o login).
+ */
+async function apiFetch(path, options) {
+  options = options || {};
+  const headers = Object.assign({}, options.headers || {}, getAuthHeaders());
+  const response = await fetch(API_BASE_URL + path, Object.assign({}, options, { headers }));
+  if (handleUnauthorized(response)) {
+    return null;
+  }
+  return response;
+}
 
 document.addEventListener('DOMContentLoaded', function () {
   if (!requireAuth()) {
@@ -170,16 +185,14 @@ function attachCreateModal() {
 
       const path = window.location.pathname;
       const pageType = path.includes('HabitTask') ? 'habit' : path.includes('RecurringTask') ? 'recurring' : 'task';
-      const endpoint = `${API_BASE_URL}/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`;
 
       try {
-        const resposta = await fetch(endpoint, {
+        const resposta = await apiFetch(`/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`, {
           method: 'POST',
-          headers: getAuthHeaders(),
           body: JSON.stringify(dados)
         });
 
-        if (handleUnauthorized(resposta)) {
+        if (!resposta) {
           return;
         }
 
@@ -201,11 +214,10 @@ function attachCreateModal() {
 }
 
 async function loadItems() {
+  showLoading(true);
   try {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
-      headers: getAuthHeaders()
-    });
-    if (handleUnauthorized(response)) {
+    const response = await apiFetch('/api/dashboard');
+    if (!response) {
       return;
     }
     if (!response.ok) {
@@ -230,7 +242,24 @@ async function loadItems() {
     const heatmap = localState.heatmap || {};
     const allItems = [...tasks, ...habits, ...recurringTasks];
     renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap);
+  } finally {
+    showLoading(false);
   }
+}
+
+function showLoading(active) {
+  let overlay = document.getElementById('tf-loading');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'tf-loading';
+    overlay.textContent = 'Carregando...';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;display:none;' +
+      'align-items:center;justify-content:center;background:rgba(255,255,255,0.75);' +
+      'z-index:9999;font-family:sans-serif;font-size:1.1em;color:#333;';
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = active ? 'flex' : 'none';
+  document.body.classList.toggle('loading', active);
 }
 
 function renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap) {
@@ -308,13 +337,12 @@ function renderList(containerId, items) {
 
 async function deleteItem(id, type) {
   try {
-    const resposta = await fetch(`${API_BASE_URL}/api/delete`, {
+    const resposta = await apiFetch('/api/delete', {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify({ id, type })
     });
 
-    if (handleUnauthorized(resposta)) {
+    if (!resposta) {
       return;
     }
 
@@ -369,13 +397,12 @@ async function setItemStatus(id, type, date, action) {
   const status = action === 'complete' ? 'completed' : action === 'failed' ? 'failed' : 'pending';
 
   try {
-    const resposta = await fetch(`${API_BASE_URL}/api/complete`, {
+    const resposta = await apiFetch('/api/complete', {
       method: 'POST',
-      headers: getAuthHeaders(),
       body: JSON.stringify({ id, type, date, status })
     });
 
-    if (handleUnauthorized(resposta)) {
+    if (!resposta) {
       return;
     }
 

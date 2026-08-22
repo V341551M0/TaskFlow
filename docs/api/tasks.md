@@ -170,6 +170,6 @@ Retorna apenas o mapa de calor (`date → value`).
 
 ## Notas
 
-- **CORS:** todos os endpoints respondem com `Access-Control-Allow-Origin: *` e respondem `204` para `OPTIONS`.
+- **CORS:** o backend reflete `Access-Control-Allow-Origin` apenas para origens em `CORS_ALLOWED_ORIGINS` (padrão dev: `http://localhost:5501` e `http://127.0.0.1:5501`) e responde `204` para `OPTIONS`.
 - **Formato dos campos:** as requisições aceitam `nome`/`data`/`todosOsDias`/`vezesAoDia`; as respostas devolvem `name`/`date`/`allDays`/`frequencyPerDay`/`type`/`completedToday`/`completionCount`/`status`.
 - **IDs:** gerados como UUID encurtado (8 caracteres).

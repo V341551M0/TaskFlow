@@ -32,11 +32,11 @@ Este documento registra as principais decisões de projeto e o motivo de cada um
 
 **Motivo:** nunca armazenar senha em texto puro. A serialização JSON do `UserDto` nunca expõe o hash.
 
-## 6. CORS liberado
+## 6. CORS restrito às origens permitidas
 
-**Decisão:** todos os endpoints respondem com `Access-Control-Allow-Origin: *`.
+**Decisão:** o backend responde com `Access-Control-Allow-Origin` apenas quando a origem da requisição está na lista `CORS_ALLOWED_ORIGINS` (variável de ambiente, separada por vírgula). O padrão de desenvolvimento é `http://localhost:5501` e `http://127.0.0.1:5501` (Live Server); em produção, defina a origem do frontend. Nunca usa `*`.
 
-**Motivo:** ambiente de desenvolvimento, em que frontend (ex.: Live Server na porta 5501) e API (porta 8080) rodam em origens diferentes. Para produção, esse cabeçalho deve ser restrito ao domínio do frontend.
+**Motivo:** em desenvolvimento o frontend (Live Server na porta 5501) e a API (porta 8080) rodam em origens diferentes, então o CORS é necessário; restringir as origens evita que qualquer site possa chamar a API com o token do usuário.
 
 ## 7. Autenticação JWT validada no backend
 
