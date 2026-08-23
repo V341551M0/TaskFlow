@@ -2,7 +2,7 @@
     Lógica da web e comunicação com o backend
 */
 // URL da API definida em web/config.js (window.TASKFLOW_API_URL) — por ambiente.
-const API_BASE_URL = window.TASKFLOW_API_URL || '';
+const API_BASE_URL = window.TASKFLOW_API_URL || 'http://127.0.0.1:8080';
 const STORAGE_KEY = 'taskflow-state';
 const AUTH_KEY = 'taskflow-auth';
 const TOKEN_KEY = 'taskflow-token';

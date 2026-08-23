@@ -2,7 +2,9 @@
     Lógica da tela de login/cadastro e comunicação com o backend Java/MySQL
 */
 // URL da API definida em web/config.js (window.TASKFLOW_API_URL) — por ambiente.
-const API_BASE_URL = window.TASKFLOW_API_URL || '';
+// O fallback mantém o login funcional mesmo se a página for servida
+// diretamente da pasta web e o arquivo de configuração não for encontrado.
+const API_BASE_URL = window.TASKFLOW_API_URL || 'http://127.0.0.1:8080';
 const AUTH_KEY = 'taskflow-auth';
 const TOKEN_KEY = 'taskflow-token';
 const USER_KEY = 'taskflow-user';
