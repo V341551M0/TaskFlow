@@ -22,7 +22,7 @@ Este documento registra as principais decisões de projeto e o motivo de cada um
 
 ## 4. Schema gerenciado por migrações Flyway
 
-**Decisão:** `util.DatabaseConnection.initialize()` executa **Flyway** no startup, aplicando migrações SQL versionadas em `src/main/resources/db/migration/` (`V1__create_tables.sql`, ...). Com `baselineOnMigrate=false`, qualquer falha ou banco não vazio sem histórico **aborta** a inicialização — a aplicação nunca executa `ALTER` ad-hoc nem atribui/exclui dados sem dono automaticamente.
+**Decisão:** `util.DatabaseConnection.initialize()` executa **Flyway** no startup, aplicando migrações versionadas em `src/main/resources/db/migration/` (`V1__create_tables.sql`, ...). Schemas legados, sem histórico Flyway, recebem baseline na V1 e passam pela V2 de compatibilidade. Dados só são atribuídos automaticamente quando há exatamente um usuário; casos ambíguos abortam a inicialização sem excluir registros.
 
 **Motivo:** evolução controlada e idempotente do schema em todos os ambientes, com histórico auditable. O `db/schema.sql` ficou restrito ao **bootstrap** (bancos e usuário, executado com `sudo` uma única vez); as tabelas vêm das migrações. Detalhes em [database/migrations.md](../database/migrations.md).
 

@@ -38,7 +38,13 @@ public final class DatabaseConnection {
         try {
             Flyway.configure()
                     .dataSource(JDBC_URL, USER, PASSWORD)
-                    .baselineOnMigrate(false)
+                    // Instalações anteriores ao Flyway já possuem as tabelas, mas não
+                    // possuem flyway_schema_history. Nesse caso, registra a V1 como
+                    // baseline e deixa a V2 de compatibilidade atualizar o schema.
+                    // Em um banco vazio, a V1 continua sendo aplicada normalmente.
+                    .baselineOnMigrate(true)
+                    .baselineVersion("1")
+                    .baselineDescription("Schema legado do TaskFlow")
                     .load()
                     .migrate();
         } catch (Exception ex) {
