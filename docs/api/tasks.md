@@ -49,12 +49,12 @@ Cria um item do tipo correspondente.
 }
 ```
 
-| Campo | Obrigatório | Descrição |
-|---|---|---|
-| `nome` | sim | Nome da atividade. |
-| `data` | não | Data (padrão: hoje). |
-| `todosOsDias` | não | `"true"`/`"false"` (padrão: `"false"`). |
-| `vezesAoDia` | não | Peso no heatmap (padrão: `"1"`). |
+| Campo         | Obrigatório | Descrição                               |
+| ------------- | ----------- | --------------------------------------- |
+| `nome`        | sim         | Nome da atividade.                      |
+| `data`        | não         | Data (padrão: hoje).                    |
+| `todosOsDias` | não         | `"true"`/`"false"` (padrão: `"false"`). |
+| `vezesAoDia`  | não         | Peso no heatmap (padrão: `"1"`).        |
 
 **Response — 201 Created**
 
@@ -91,21 +91,21 @@ Altera o status de um item. Sem o campo `status`, o item é alternado para **con
 }
 ```
 
-| Campo | Descrição |
-|---|---|
-| `id` | ID do item. |
-| `type` | `task`, `habit` ou `recurring`. |
-| `date` | Data da conclusão/falha (padrão: data do item ou hoje). |
+| Campo    | Descrição                                                                       |
+| -------- | ------------------------------------------------------------------------------- |
+| `id`     | ID do item.                                                                     |
+| `type`   | `task`, `habit` ou `recurring`.                                                 |
+| `date`   | Data da conclusão/falha (padrão: data do item ou hoje).                         |
 | `status` | `completed`, `failed` ou `pending` (opcional; sem ele, alterna para concluído). |
 
 **Response — 200 OK**: item atualizado (mesma estrutura da listagem).
 
 **Erros**
 
-| Código | Situação |
-|---|---|
-| `400` | Item já finalizado (concluído/falha) e não pode mudar de status. |
-| `404` | Item não encontrado. |
+| Código | Situação                                                         |
+| ------ | ---------------------------------------------------------------- |
+| `400`  | Item já finalizado (concluído/falha) e não pode mudar de status. |
+| `404`  | Item não encontrado.                                             |
 
 ---
 
@@ -140,9 +140,9 @@ Retorna tudo que a tela inicial precisa em uma única chamada.
 
 ```json
 {
-  "tasks": [ "..." ],
-  "habits": [ "..." ],
-  "recurringTasks": [ "..." ],
+  "tasks": ["..."],
+  "habits": ["..."],
+  "recurringTasks": ["..."],
   "heatmap": {
     "2026-08-16": 4,
     "2026-08-15": 2

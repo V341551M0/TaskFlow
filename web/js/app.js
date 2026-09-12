@@ -2,10 +2,10 @@
     Lógica da web e comunicação com o backend
 */
 // URL da API definida em web/config.js (window.TASKFLOW_API_URL) — por ambiente.
-const API_BASE_URL = window.TASKFLOW_API_URL || 'http://127.0.0.1:8080';
-const STORAGE_KEY = 'taskflow-state';
-const AUTH_KEY = 'taskflow-auth';
-const TOKEN_KEY = 'taskflow-token';
+const API_BASE_URL = window.TASKFLOW_API_URL || "http://127.0.0.1:8080";
+const STORAGE_KEY = "taskflow-state";
+const AUTH_KEY = "taskflow-auth";
+const TOKEN_KEY = "taskflow-token";
 
 /**
  * Cliente HTTP centralizado: prefixa a URL da API, anexa o token JWT e
@@ -14,14 +14,17 @@ const TOKEN_KEY = 'taskflow-token';
 async function apiFetch(path, options) {
   options = options || {};
   const headers = Object.assign({}, options.headers || {}, getAuthHeaders());
-  const response = await fetch(API_BASE_URL + path, Object.assign({}, options, { headers }));
+  const response = await fetch(
+    API_BASE_URL + path,
+    Object.assign({}, options, { headers }),
+  );
   if (handleUnauthorized(response)) {
     return null;
   }
   return response;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", function () {
   if (!requireAuth()) {
     return;
   }
@@ -32,7 +35,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function requireAuth() {
-  if (localStorage.getItem(AUTH_KEY) === 'true' && localStorage.getItem(TOKEN_KEY)) {
+  if (
+    localStorage.getItem(AUTH_KEY) === "true" &&
+    localStorage.getItem(TOKEN_KEY)
+  ) {
     return true;
   }
   window.location.replace(getLoginUrl());
@@ -40,10 +46,10 @@ function requireAuth() {
 }
 
 function getAuthHeaders() {
-  const token = localStorage.getItem(TOKEN_KEY) || '';
+  const token = localStorage.getItem(TOKEN_KEY) || "";
   return {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + token
+    "Content-Type": "application/json",
+    Authorization: "Bearer " + token,
   };
 }
 
@@ -58,8 +64,8 @@ function handleUnauthorized(response) {
 }
 
 function attachLogout() {
-  document.querySelectorAll('.logout-btn').forEach(function (button) {
-    button.addEventListener('click', function (event) {
+  document.querySelectorAll(".logout-btn").forEach(function (button) {
+    button.addEventListener("click", function (event) {
       event.preventDefault();
       localStorage.removeItem(AUTH_KEY);
       localStorage.removeItem(TOKEN_KEY);
@@ -69,54 +75,62 @@ function attachLogout() {
 }
 
 function getLoginUrl() {
-  const isSubpage = window.location.pathname.includes('/pages/') ||
-                    window.location.pathname.endsWith('Task.html') ||
-                    window.location.pathname.endsWith('HabitTask.html') ||
-                    window.location.pathname.endsWith('RecurringTask.html');
-  return isSubpage ? 'login.html' : 'pages/login.html';
+  const isSubpage =
+    window.location.pathname.includes("/pages/") ||
+    window.location.pathname.endsWith("Task.html") ||
+    window.location.pathname.endsWith("HabitTask.html") ||
+    window.location.pathname.endsWith("RecurringTask.html");
+  return isSubpage ? "login.html" : "pages/login.html";
 }
 
 window.openTaskModal = function () {
-  const modal = document.getElementById('modal-task');
+  const modal = document.getElementById("modal-task");
   if (modal) {
-    modal.style.display = 'flex';
+    modal.style.display = "flex";
   }
 };
 
 window.closeTaskModal = function () {
-  const modal = document.getElementById('modal-task');
+  const modal = document.getElementById("modal-task");
   if (modal) {
-    modal.style.display = 'none';
+    modal.style.display = "none";
   }
 };
 
 function attachNavigation() {
-  const elements = document.querySelectorAll('.nav-buttons button, .nav-buttons a');
-  const isSubpage = window.location.pathname.includes('/pages/') || 
-                    window.location.pathname.endsWith('Task.html') || 
-                    window.location.pathname.endsWith('HabitTask.html') || 
-                    window.location.pathname.endsWith('RecurringTask.html');
-  const pagesPrefix = isSubpage ? '' : 'pages/';
-  const homePrefix = isSubpage ? '../' : './';
+  const elements = document.querySelectorAll(
+    ".nav-buttons button, .nav-buttons a",
+  );
+  const isSubpage =
+    window.location.pathname.includes("/pages/") ||
+    window.location.pathname.endsWith("Task.html") ||
+    window.location.pathname.endsWith("HabitTask.html") ||
+    window.location.pathname.endsWith("RecurringTask.html");
+  const pagesPrefix = isSubpage ? "" : "pages/";
+  const homePrefix = isSubpage ? "../" : "./";
 
   elements.forEach(function (element) {
-    element.addEventListener('click', function (event) {
+    element.addEventListener("click", function (event) {
       const texto = element.textContent.trim().toLowerCase();
       let targetUrl = null;
 
       // Não interceptar botões de criação de atividades (ex: "Criar Novo Hábito")
-      if (texto.startsWith('criar')) {
+      if (texto.startsWith("criar")) {
         return;
       }
 
-      if (texto.includes('voltar') || texto.includes('pagina inicial') || texto.includes('página inicial')) {
-        targetUrl = homePrefix + 'index.html';
-      } else if (texto === 'tarefas recorrentes') {
-        targetUrl = pagesPrefix + 'RecurringTask.html';
-      } else if (texto === 'hábitos' || texto === 'habitos') {
-        targetUrl = pagesPrefix + 'HabitTask.html';
-      } else if (texto === 'tarefas') {
-        targetUrl = pagesPrefix + 'Task.html';
+      if (
+        texto.includes("voltar") ||
+        texto.includes("pagina inicial") ||
+        texto.includes("página inicial")
+      ) {
+        targetUrl = homePrefix + "index.html";
+      } else if (texto === "tarefas recorrentes") {
+        targetUrl = pagesPrefix + "RecurringTask.html";
+      } else if (texto === "hábitos" || texto === "habitos") {
+        targetUrl = pagesPrefix + "HabitTask.html";
+      } else if (texto === "tarefas") {
+        targetUrl = pagesPrefix + "Task.html";
       }
 
       if (targetUrl) {
@@ -128,13 +142,17 @@ function attachNavigation() {
 }
 
 function attachCreateModal() {
-  const createButtons = document.querySelectorAll('#btn-nova-tarefa, #btn-novo-habito, #btn-nova-recorrente, .new-class-button button, .new-class-button a, .add-task-btn, [data-action="open-modal"]');
-  const modal = document.getElementById('modal-task');
-  const closeButtons = document.querySelectorAll('.close-btn, .cose-btn, .modal-close');
-  const form = document.getElementById('form-task');
+  const createButtons = document.querySelectorAll(
+    '#btn-nova-tarefa, #btn-novo-habito, #btn-nova-recorrente, .new-class-button button, .new-class-button a, .add-task-btn, [data-action="open-modal"]',
+  );
+  const modal = document.getElementById("modal-task");
+  const closeButtons = document.querySelectorAll(
+    ".close-btn, .cose-btn, .modal-close",
+  );
+  const form = document.getElementById("form-task");
 
   createButtons.forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       openTaskModal();
@@ -142,7 +160,7 @@ function attachCreateModal() {
   });
 
   closeButtons.forEach((button) => {
-    button.addEventListener('click', (e) => {
+    button.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       closeTaskModal();
@@ -150,7 +168,7 @@ function attachCreateModal() {
   });
 
   if (modal) {
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener("click", (e) => {
       if (e.target === modal) {
         closeTaskModal();
       }
@@ -158,21 +176,21 @@ function attachCreateModal() {
   }
 
   if (form) {
-    form.addEventListener('submit', async (event) => {
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      const nomeInput = document.getElementById('nome');
-      const dataInput = document.getElementById('data');
-      const diarioInput = document.getElementById('diario');
-      const vezesDiaInput = document.getElementById('vezes-dia');
+      const nomeInput = document.getElementById("nome");
+      const dataInput = document.getElementById("data");
+      const diarioInput = document.getElementById("diario");
+      const vezesDiaInput = document.getElementById("vezes-dia");
 
-      const nome = nomeInput ? nomeInput.value.trim() : '';
-      const dataVal = dataInput ? dataInput.value : '';
+      const nome = nomeInput ? nomeInput.value.trim() : "";
+      const dataVal = dataInput ? dataInput.value : "";
       const diario = diarioInput ? diarioInput.checked : false;
-      const vezesDia = vezesDiaInput ? vezesDiaInput.value : '1';
+      const vezesDia = vezesDiaInput ? vezesDiaInput.value : "1";
 
       if (!nome) {
-        alert('Por favor, preencha o nome da atividade.');
+        alert("Por favor, preencha o nome da atividade.");
         return;
       }
 
@@ -180,17 +198,24 @@ function attachCreateModal() {
         nome: nome,
         data: dataVal,
         todosOsDias: String(diario),
-        vezesAoDia: String(vezesDia)
+        vezesAoDia: String(vezesDia),
       };
 
       const path = window.location.pathname;
-      const pageType = path.includes('HabitTask') ? 'habit' : path.includes('RecurringTask') ? 'recurring' : 'task';
+      const pageType = path.includes("HabitTask")
+        ? "habit"
+        : path.includes("RecurringTask")
+          ? "recurring"
+          : "task";
 
       try {
-        const resposta = await apiFetch(`/api/${pageType === 'habit' ? 'habits' : pageType === 'recurring' ? 'recurring-tasks' : 'tasks'}`, {
-          method: 'POST',
-          body: JSON.stringify(dados)
-        });
+        const resposta = await apiFetch(
+          `/api/${pageType === "habit" ? "habits" : pageType === "recurring" ? "recurring-tasks" : "tasks"}`,
+          {
+            method: "POST",
+            body: JSON.stringify(dados),
+          },
+        );
 
         if (!resposta) {
           return;
@@ -203,11 +228,16 @@ function attachCreateModal() {
           return;
         } else {
           const err = await resposta.json().catch(() => ({}));
-          alert(err.message || 'Erro ao criar atividade no backend Java MySQL.');
+          alert(
+            err.message || "Erro ao criar atividade no backend Java MySQL.",
+          );
         }
       } catch (error) {
-        console.warn('Não foi possível conectar ao servidor backend Java:', error);
-        alert('Erro de comunicação com o servidor backend Java MySQL.');
+        console.warn(
+          "Não foi possível conectar ao servidor backend Java:",
+          error,
+        );
+        alert("Erro de comunicação com o servidor backend Java MySQL.");
       }
     });
   }
@@ -216,12 +246,12 @@ function attachCreateModal() {
 async function loadItems() {
   showLoading(true);
   try {
-    const response = await apiFetch('/api/dashboard');
+    const response = await apiFetch("/api/dashboard");
     if (!response) {
       return;
     }
     if (!response.ok) {
-      throw new Error('Falha ao carregar dashboard');
+      throw new Error("Falha ao carregar dashboard");
     }
 
     const dashboard = await response.json();
@@ -234,7 +264,7 @@ async function loadItems() {
     persistLocalState({ tasks, habits, recurringTasks, heatmap });
     renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap);
   } catch (error) {
-    console.warn('Usando dados locais do navegador.', error);
+    console.warn("Usando dados locais do navegador.", error);
     const localState = loadLocalState();
     const tasks = localState.tasks || [];
     const habits = localState.habits || [];
@@ -248,30 +278,37 @@ async function loadItems() {
 }
 
 function showLoading(active) {
-  let overlay = document.getElementById('tf-loading');
+  let overlay = document.getElementById("tf-loading");
   if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'tf-loading';
-    overlay.textContent = 'Carregando...';
-    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;display:none;' +
-      'align-items:center;justify-content:center;background:rgba(255,255,255,0.75);' +
-      'z-index:9999;font-family:sans-serif;font-size:1.1em;color:#333;';
+    overlay = document.createElement("div");
+    overlay.id = "tf-loading";
+    overlay.textContent = "Carregando...";
+    overlay.style.cssText =
+      "position:fixed;top:0;left:0;right:0;bottom:0;display:none;" +
+      "align-items:center;justify-content:center;background:rgba(255,255,255,0.75);" +
+      "z-index:9999;font-family:sans-serif;font-size:1.1em;color:#333;";
     document.body.appendChild(overlay);
   }
-  overlay.style.display = active ? 'flex' : 'none';
-  document.body.classList.toggle('loading', active);
+  overlay.style.display = active ? "flex" : "none";
+  document.body.classList.toggle("loading", active);
 }
 
-function renderListsAndCharts(tasks, habits, recurringTasks, allItems, heatmap) {
-  renderList('dashboard-list', allItems);
-  renderList('task-list', tasks);
-  renderList('habit-list', habits);
-  renderList('recurring-list', recurringTasks);
+function renderListsAndCharts(
+  tasks,
+  habits,
+  recurringTasks,
+  allItems,
+  heatmap,
+) {
+  renderList("dashboard-list", allItems);
+  renderList("task-list", tasks);
+  renderList("habit-list", habits);
+  renderList("recurring-list", recurringTasks);
 
   updateMetrics(tasks, habits, recurringTasks);
   renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap);
 
-  if (typeof window.refreshHeatmap === 'function') {
+  if (typeof window.refreshHeatmap === "function") {
     window.refreshHeatmap(heatmap);
   }
 }
@@ -283,39 +320,45 @@ function renderList(containerId, items) {
   }
 
   if (!items || items.length === 0) {
-    container.innerHTML = '<p class="empty-state">Nenhum item cadastrado ainda.</p>';
+    container.innerHTML =
+      '<p class="empty-state">Nenhum item cadastrado ainda.</p>';
     return;
   }
 
-  container.innerHTML = items.map(item => {
-    const status = item.status || (item.completedToday ? 'completed' : 'pending');
-    const isCompleted = status === 'completed';
-    const isFailed = status === 'failed';
-    const isFinalized = isCompleted || isFailed;
-    return `
-      <article class="item-card ${isCompleted ? 'item-card-completed' : isFailed ? 'item-card-failed' : 'item-card-pending'}" data-item-id="${item.id}" data-item-type="${item.type || 'item'}">
+  container.innerHTML = items
+    .map((item) => {
+      const status =
+        item.status || (item.completedToday ? "completed" : "pending");
+      const isCompleted = status === "completed";
+      const isFailed = status === "failed";
+      const isFinalized = isCompleted || isFailed;
+      return `
+      <article class="item-card ${isCompleted ? "item-card-completed" : isFailed ? "item-card-failed" : "item-card-pending"}" data-item-id="${item.id}" data-item-type="${item.type || "item"}">
         <div>
           <strong>${item.name}</strong>
-          <p>${item.date || 'Sem data'}</p>
+          <p>${item.date || "Sem data"}</p>
         </div>
         <div class="item-actions">
-          <span class="item-badge">${item.type || 'item'}</span>
+          <span class="item-badge">${item.type || "item"}</span>
           <div class="status-buttons">
-            <button class="status-btn ${isCompleted ? 'active' : ''}" ${isFinalized ? 'disabled title="Status finalizado"' : ''} data-action="complete" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">${isCompleted ? 'Concluído' : 'Concluir'}</button>
-            <button class="status-btn ${isFailed ? 'active failed' : ''}" ${isFinalized ? 'disabled title="Status finalizado"' : ''} data-action="failed" data-id="${item.id}" data-type="${item.type || 'item'}" data-date="${item.date || ''}">${isFailed ? 'Falhou' : 'Falha'}</button>
-            <button class="status-btn delete-btn" data-action="delete" data-id="${item.id}" data-type="${item.type || 'item'}">Apagar</button>
+            <button class="status-btn ${isCompleted ? "active" : ""}" ${isFinalized ? 'disabled title="Status finalizado"' : ""} data-action="complete" data-id="${item.id}" data-type="${item.type || "item"}" data-date="${item.date || ""}">${isCompleted ? "Concluído" : "Concluir"}</button>
+            <button class="status-btn ${isFailed ? "active failed" : ""}" ${isFinalized ? 'disabled title="Status finalizado"' : ""} data-action="failed" data-id="${item.id}" data-type="${item.type || "item"}" data-date="${item.date || ""}">${isFailed ? "Falhou" : "Falha"}</button>
+            <button class="status-btn delete-btn" data-action="delete" data-id="${item.id}" data-type="${item.type || "item"}">Apagar</button>
           </div>
         </div>
       </article>
     `;
-  }).join('');
+    })
+    .join("");
 
-  document.querySelectorAll('.status-btn').forEach((button) => {
-    if (button.dataset.action === 'delete') {
-      button.addEventListener('click', async (event) => {
+  document.querySelectorAll(".status-btn").forEach((button) => {
+    if (button.dataset.action === "delete") {
+      button.addEventListener("click", async (event) => {
         event.stopPropagation();
         const target = event.currentTarget;
-        const confirmed = window.confirm('Deseja realmente apagar esta atividade?');
+        const confirmed = window.confirm(
+          "Deseja realmente apagar esta atividade?",
+        );
         if (!confirmed) {
           return;
         }
@@ -323,23 +366,30 @@ function renderList(containerId, items) {
       });
       return;
     }
-    button.addEventListener('click', async (event) => {
+    button.addEventListener("click", async (event) => {
       event.stopPropagation();
       const target = event.currentTarget;
       if (target.disabled) {
-        alert('Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.');
+        alert(
+          "Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.",
+        );
         return;
       }
-      await setItemStatus(target.dataset.id, target.dataset.type, target.dataset.date, target.dataset.action);
+      await setItemStatus(
+        target.dataset.id,
+        target.dataset.type,
+        target.dataset.date,
+        target.dataset.action,
+      );
     });
   });
 }
 
 async function deleteItem(id, type) {
   try {
-    const resposta = await apiFetch('/api/delete', {
-      method: 'POST',
-      body: JSON.stringify({ id, type })
+    const resposta = await apiFetch("/api/delete", {
+      method: "POST",
+      body: JSON.stringify({ id, type }),
     });
 
     if (!resposta) {
@@ -351,11 +401,19 @@ async function deleteItem(id, type) {
       return;
     }
   } catch (error) {
-    console.warn('API indisponível para exclusão, removendo localmente.', error);
+    console.warn(
+      "API indisponível para exclusão, removendo localmente.",
+      error,
+    );
   }
 
   const localState = loadLocalState();
-  const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
+  const targetList =
+    type === "habit"
+      ? "habits"
+      : type === "recurring"
+        ? "recurringTasks"
+        : "tasks";
   const list = localState[targetList] || [];
   const item = list.find((entry) => entry.id === id);
   const updatedList = list.filter((entry) => entry.id !== id);
@@ -377,11 +435,11 @@ async function deleteItem(id, type) {
       const completionDate = item.date || new Date().toISOString().slice(0, 10);
       const delta = Number(item.frequencyPerDay || 1);
       const current = Number(localState.heatmap[completionDate] || 0);
-      if (item.status === 'completed' || item.completedToday) {
+      if (item.status === "completed" || item.completedToday) {
         const next = current - delta;
         if (next <= 0) delete localState.heatmap[completionDate];
         else localState.heatmap[completionDate] = next;
-      } else if (item.status === 'failed') {
+      } else if (item.status === "failed") {
         const next = current + delta;
         if (next <= 0) delete localState.heatmap[completionDate];
         else localState.heatmap[completionDate] = next;
@@ -394,12 +452,17 @@ async function deleteItem(id, type) {
 }
 
 async function setItemStatus(id, type, date, action) {
-  const status = action === 'complete' ? 'completed' : action === 'failed' ? 'failed' : 'pending';
+  const status =
+    action === "complete"
+      ? "completed"
+      : action === "failed"
+        ? "failed"
+        : "pending";
 
   try {
-    const resposta = await apiFetch('/api/complete', {
-      method: 'POST',
-      body: JSON.stringify({ id, type, date, status })
+    const resposta = await apiFetch("/api/complete", {
+      method: "POST",
+      body: JSON.stringify({ id, type, date, status }),
     });
 
     if (!resposta) {
@@ -417,32 +480,49 @@ async function setItemStatus(id, type, date, action) {
       }
     }
   } catch (error) {
-    console.warn('API indisponível para marcação, atualizando localmente.', error);
+    console.warn(
+      "API indisponível para marcação, atualizando localmente.",
+      error,
+    );
   }
 
   const localState = loadLocalState();
-  const targetList = type === 'habit' ? 'habits' : type === 'recurring' ? 'recurringTasks' : 'tasks';
+  const targetList =
+    type === "habit"
+      ? "habits"
+      : type === "recurring"
+        ? "recurringTasks"
+        : "tasks";
   const list = localState[targetList] || [];
   const item = list.find((entry) => entry.id === id);
   if (item) {
-    const previousStatus = item.status || (item.completedToday ? 'completed' : 'pending');
-    if (previousStatus === 'completed' || previousStatus === 'failed') {
-      alert('Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.');
+    const previousStatus =
+      item.status || (item.completedToday ? "completed" : "pending");
+    if (previousStatus === "completed" || previousStatus === "failed") {
+      alert(
+        "Atividade já possui status finalizado (concluída ou falha) e não pode ser alterada novamente.",
+      );
       return;
     }
     const delta = Number(item.frequencyPerDay || 1);
-    const completionDate = date || item.date || new Date().toISOString().slice(0, 10);
-    const normalizedState = status === 'completed' ? 'completed' : status === 'failed' ? 'failed' : 'pending';
+    const completionDate =
+      date || item.date || new Date().toISOString().slice(0, 10);
+    const normalizedState =
+      status === "completed"
+        ? "completed"
+        : status === "failed"
+          ? "failed"
+          : "pending";
 
     item.history = item.history || {};
 
     item.status = normalizedState;
-    item.completedToday = normalizedState === 'completed';
+    item.completedToday = normalizedState === "completed";
     item.completionCount = item.completionCount || 0;
-    if (normalizedState === 'completed') {
+    if (normalizedState === "completed") {
       item.completionCount += delta;
       item.history[completionDate] = delta;
-    } else if (normalizedState === 'failed') {
+    } else if (normalizedState === "failed") {
       item.completionCount = Math.max(0, item.completionCount - delta);
       item.history[completionDate] = -delta;
     } else {
@@ -453,13 +533,13 @@ async function setItemStatus(id, type, date, action) {
     localState.heatmap = localState.heatmap || {};
     const currentValue = Number(localState.heatmap[completionDate] || 0);
     let nextValue = currentValue;
-    if (normalizedState === 'completed') {
+    if (normalizedState === "completed") {
       nextValue = currentValue + delta;
-    } else if (normalizedState === 'failed') {
+    } else if (normalizedState === "failed") {
       nextValue = currentValue - delta;
-    } else if (previousStatus === 'completed') {
+    } else if (previousStatus === "completed") {
       nextValue = currentValue - delta;
-    } else if (previousStatus === 'failed') {
+    } else if (previousStatus === "failed") {
       nextValue = currentValue + delta;
     }
     if (nextValue <= 0) {
@@ -473,9 +553,9 @@ async function setItemStatus(id, type, date, action) {
 }
 
 function updateMetrics(tasks, habits, recurringTasks) {
-  const taskCount = document.getElementById('task-count');
-  const habitCount = document.getElementById('habit-count');
-  const recurringCount = document.getElementById('recurring-count');
+  const taskCount = document.getElementById("task-count");
+  const habitCount = document.getElementById("habit-count");
+  const recurringCount = document.getElementById("recurring-count");
 
   if (taskCount) taskCount.textContent = `${tasks.length}/-`;
   if (habitCount) habitCount.textContent = `${habits.length}/-`;
@@ -490,7 +570,7 @@ function loadLocalState() {
     }
     return JSON.parse(stored);
   } catch (error) {
-    console.warn('Não foi possível carregar o estado local.', error);
+    console.warn("Não foi possível carregar o estado local.", error);
     return { tasks: [], habits: [], recurringTasks: [], heatmap: {} };
   }
 }
@@ -499,15 +579,23 @@ function persistLocalState(state) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (error) {
-    console.warn('Não foi possível persistir o estado local.', error);
+    console.warn("Não foi possível persistir o estado local.", error);
   }
 }
 
-function renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap) {
-  const weeklyTotalElement = document.getElementById('weekly-total');
-  const monthlyRateElement = document.getElementById('monthly-rate');
-  const completionRatioElement = document.getElementById('completion-ratio');
-  const summaryContainer = document.getElementById('activity-summary-container');
+function renderDashboardCharts(
+  tasks,
+  habits,
+  recurringTasks,
+  allItems,
+  heatmap,
+) {
+  const weeklyTotalElement = document.getElementById("weekly-total");
+  const monthlyRateElement = document.getElementById("monthly-rate");
+  const completionRatioElement = document.getElementById("completion-ratio");
+  const summaryContainer = document.getElementById(
+    "activity-summary-container",
+  );
 
   if (weeklyTotalElement) {
     weeklyTotalElement.textContent = `${calculateWeeklyTotal(heatmap)} pts`;
@@ -515,28 +603,43 @@ function renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap)
 
   if (monthlyRateElement) {
     const monthlyRate = calculateMonthlyRate(heatmap);
-    monthlyRateElement.textContent = `${monthlyRate >= 0 ? '+' : ''}${monthlyRate}%`;
+    monthlyRateElement.textContent = `${monthlyRate >= 0 ? "+" : ""}${monthlyRate}%`;
   }
 
   if (completionRatioElement) {
-    const completed = allItems.filter((item) => (item.status || (item.completedToday ? 'completed' : 'pending')) === 'completed').length;
+    const completed = allItems.filter(
+      (item) =>
+        (item.status || (item.completedToday ? "completed" : "pending")) ===
+        "completed",
+    ).length;
     const total = allItems.length;
-    const ratioLabel = total > 0 ? `${completed}/${total}` : '0/0';
+    const ratioLabel = total > 0 ? `${completed}/${total}` : "0/0";
     completionRatioElement.textContent = ratioLabel;
   }
 
   if (summaryContainer) {
-    const summaryItems = allItems.slice(0, 5).map((item) => {
-      const status = item.status || (item.completedToday ? 'completed' : 'pending');
-      const label = status === 'completed' ? 'Concluída' : status === 'failed' ? 'Falha' : 'Pendente';
-      return `
+    const summaryItems = allItems
+      .slice(0, 5)
+      .map((item) => {
+        const status =
+          item.status || (item.completedToday ? "completed" : "pending");
+        const label =
+          status === "completed"
+            ? "Concluída"
+            : status === "failed"
+              ? "Falha"
+              : "Pendente";
+        return `
         <div class="summary-item">
           <span>${item.name}</span>
           <small>${label}</small>
         </div>
       `;
-    }).join('');
-    summaryContainer.innerHTML = summaryItems || '<p class="empty-state">Nenhuma atividade registrada ainda.</p>';
+      })
+      .join("");
+    summaryContainer.innerHTML =
+      summaryItems ||
+      '<p class="empty-state">Nenhuma atividade registrada ainda.</p>';
   }
 
   renderWeeklyBars(heatmap);
@@ -545,12 +648,12 @@ function renderDashboardCharts(tasks, habits, recurringTasks, allItems, heatmap)
 }
 
 function renderWeeklyBars(heatmap) {
-  const bars = document.querySelectorAll('.bar-chart-svg .chart-bar');
+  const bars = document.querySelectorAll(".bar-chart-svg .chart-bar");
   if (!bars.length) {
     return;
   }
 
-  const labels = document.querySelectorAll('.chart-labels span');
+  const labels = document.querySelectorAll(".chart-labels span");
   const values = [];
   const today = new Date();
   for (let index = 6; index >= 0; index -= 1) {
@@ -559,8 +662,11 @@ function renderWeeklyBars(heatmap) {
     values.push(heatmap[formatIsoDate(date)] || 0);
 
     if (labels[index]) {
-      const label = date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
-      labels[index].textContent = label.charAt(0).toUpperCase() + label.slice(1);
+      const label = date
+        .toLocaleDateString("pt-BR", { weekday: "short" })
+        .replace(".", "");
+      labels[index].textContent =
+        label.charAt(0).toUpperCase() + label.slice(1);
     }
   }
 
@@ -569,13 +675,13 @@ function renderWeeklyBars(heatmap) {
     const value = values[index] || 0;
     const height = Math.max(8, (value / maxValue) * 90);
     const y = 120 - height;
-    bar.setAttribute('y', y.toString());
-    bar.setAttribute('height', height.toString());
+    bar.setAttribute("y", y.toString());
+    bar.setAttribute("height", height.toString());
   });
 }
 
 function renderMonthlyLine(heatmap) {
-  const line = document.querySelector('.line-chart-svg .chart-line');
+  const line = document.querySelector(".line-chart-svg .chart-line");
   if (!line) {
     return;
   }
@@ -588,22 +694,28 @@ function renderMonthlyLine(heatmap) {
   }
 
   const maxValue = Math.max(...values, 1);
-  const points = values.map((value, index) => {
-    const x = 15 + index * 90;
-    const y = 120 - (value / maxValue) * 90;
-    return `${index === 0 ? 'M' : 'L'} ${x} ${y.toFixed(1)}`;
-  }).join(' ');
+  const points = values
+    .map((value, index) => {
+      const x = 15 + index * 90;
+      const y = 120 - (value / maxValue) * 90;
+      return `${index === 0 ? "M" : "L"} ${x} ${y.toFixed(1)}`;
+    })
+    .join(" ");
 
-  line.setAttribute('d', points);
+  line.setAttribute("d", points);
 }
 
 function renderDonut(items) {
-  const donutSegment = document.querySelector('.donut-segment');
+  const donutSegment = document.querySelector(".donut-segment");
   if (!donutSegment) {
     return;
   }
 
-  const completed = items.filter((item) => (item.status || (item.completedToday ? 'completed' : 'pending')) === 'completed').length;
+  const completed = items.filter(
+    (item) =>
+      (item.status || (item.completedToday ? "completed" : "pending")) ===
+      "completed",
+  ).length;
   const total = items.length;
   const ratio = total > 0 ? completed / total : 0;
   const radius = 40;
@@ -625,7 +737,11 @@ function calculateWeeklyTotal(heatmap) {
 
 function calculateMonthlyRate(heatmap) {
   const currentMonth = new Date();
-  const previousMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+  const previousMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() - 1,
+    1,
+  );
   const currentTotal = sumValuesForMonth(heatmap, currentMonth);
   const previousTotal = sumValuesForMonth(heatmap, previousMonth);
 
@@ -642,7 +758,7 @@ function sumValuesForMonth(heatmap, referenceDate) {
   const month = referenceDate.getMonth();
 
   Object.entries(heatmap).forEach(([dateKey, value]) => {
-    const [entryYear, entryMonth] = dateKey.split('-').map(Number);
+    const [entryYear, entryMonth] = dateKey.split("-").map(Number);
     if (entryYear === year && entryMonth - 1 === month) {
       total += Number(value || 0);
     }
@@ -653,7 +769,7 @@ function sumValuesForMonth(heatmap, referenceDate) {
 
 function formatIsoDate(date) {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }

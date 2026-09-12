@@ -6,22 +6,22 @@ O TaskFlow usa **exclusivamente o MySQL do sistema** em `127.0.0.1:3306` e cria 
 
 ## Arquivos relacionados
 
-| Arquivo | Papel |
-|---|---|
-| `db/schema.sql` | **Bootstrap** (executado com sudo uma vez) — cria os bancos `taskflow_db` e `taskflow_test` e o usuário da aplicação. Não cria tabelas. |
-| `src/main/resources/db/migration/V1__*.sql` | **Migrações Flyway** — criam as tabelas. Aplicadas automaticamente por `util.DatabaseConnection.initialize()` no startup. |
-| `docs/database/schema.md` | **Explicativo** — documenta as tabelas. |
+| Arquivo                                     | Papel                                                                                                                                   |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/schema.sql`                             | **Bootstrap** (executado com sudo uma vez) — cria os bancos `taskflow_db` e `taskflow_test` e o usuário da aplicação. Não cria tabelas. |
+| `src/main/resources/db/migration/V1__*.sql` | **Migrações Flyway** — criam as tabelas. Aplicadas automaticamente por `util.DatabaseConnection.initialize()` no startup.               |
+| `docs/database/schema.md`                   | **Explicativo** — documenta as tabelas.                                                                                                 |
 
 > As tabelas são criadas pelas migrações Flyway (`V1__create_tables.sql`) quando a aplicação inicia, então **não é preciso criar tabelas manualmente** em cenário normal. Detalhes em [docs/database/migrations.md](../database/migrations.md).
 
 ## Credenciais de conexão
 
-| Variável | Padrão | Descrição |
-|---|---|---|
-| `MYSQL_HOST` | `127.0.0.1` | Host do MySQL do sistema. |
-| `MYSQL_PORT` | `3306` | Porta do MySQL do sistema. |
-| `MYSQL_DB` | `taskflow_db` | Nome do banco de dados. |
-| `MYSQL_USER` | `taskflow` | Usuário da aplicação. |
+| Variável         | Padrão          | Descrição                        |
+| ---------------- | --------------- | -------------------------------- |
+| `MYSQL_HOST`     | `127.0.0.1`     | Host do MySQL do sistema.        |
+| `MYSQL_PORT`     | `3306`          | Porta do MySQL do sistema.       |
+| `MYSQL_DB`       | `taskflow_db`   | Nome do banco de dados.          |
+| `MYSQL_USER`     | `taskflow`      | Usuário da aplicação.            |
 | `MYSQL_PASSWORD` | `TaskFlow@2026` | Senha padrão de desenvolvimento. |
 
 Os mesmos valores padrão são usados por `run.sh` e por `util/DatabaseConnection`.
@@ -35,6 +35,7 @@ sudo mysql < db/schema.sql
 ```
 
 O que o arquivo faz:
+
 - cria o banco `taskflow_db` (se não existir);
 - cria o banco `taskflow_test` (usado pela suíte de testes);
 - cria/garante o usuário `'taskflow'@'localhost'` e `'taskflow'@'127.0.0.1'` com a senha `TaskFlow@2026` (satisfaz a política MEDIUM do MySQL 8.0.46);
@@ -51,6 +52,7 @@ Com o MySQL do sistema ativo e o usuário `taskflow` criado, basta:
 ```
 
 O script:
+
 1. conecta no MySQL do sistema em `127.0.0.1:3306` com `taskflow`/`TaskFlow@2026`;
 2. garante que `taskflow_db` exista;
 3. inicia a API Java na porta `8080` apontando para esse banco.

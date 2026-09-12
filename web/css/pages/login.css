@@ -1,229 +1,234 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Nexa";
-    font-weight: 400;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Nexa";
+  font-weight: 400;
 }
 
 @font-face {
-    font-family: "Nexa";
-    src: url("../../assets/fonts/nexa-light.otf");
-    font-weight: 300;
-    font-style: normal;
+  font-family: "Nexa";
+  src: url("../../assets/fonts/nexa-light.otf");
+  font-weight: 300;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: "Nexa";
-    src: url("../../assets/fonts/nexaregular.otf");
-    font-weight: 400;
-    font-style: normal;
+  font-family: "Nexa";
+  src: url("../../assets/fonts/nexaregular.otf");
+  font-weight: 400;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: "Nexa";
-    src: url("../../assets/fonts/Nexa\ Bold.otf");
-    font-weight: 700;
-    font-style: normal;
+  font-family: "Nexa";
+  src: url("../../assets/fonts/Nexa\ Bold.otf");
+  font-weight: 700;
+  font-style: normal;
 }
-body{
-    color: white;
+body {
+  color: white;
 }
 
-h2{
-  font-size: 60px; 
+h2 {
+  font-size: 60px;
   margin-bottom: 32px;
   text-align: center;
   font-weight: 700;
-   
 }
 
-p{
-    margin-bottom: 32px;
-    width: 400px;
-    text-align: center;
+p {
+  margin-bottom: 32px;
+  width: 400px;
+  text-align: center;
 }
 
-.containerFather{
-    width: 100%;
-    height: 100vh;
-    background-color: #14151A;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.containerFather {
+  width: 100%;
+  height: 100vh;
+  background-color: #14151a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.card{
-    width: 80%;
-    height: 90vh;
-    background-color: rgba(255 255 255/ .10);
-    border-radius: 32px;
-    padding: 32px 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
+.card {
+  width: 80%;
+  height: 90vh;
+  background-color: rgba(255 255 255/ 0.1);
+  border-radius: 32px;
+  padding: 32px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
 }
 
-.left, .rigth{
-    width: 50%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
+.left,
+.rigth {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
 }
 
-.formLogin, .fcLogin, .formCadastro, .fcCd{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.formLogin,
+.fcLogin,
+.formCadastro,
+.fcCd {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.fcLogin, .fcCd{
-    position: absolute;
+.fcLogin,
+.fcCd {
+  position: absolute;
 
-    h2, p{
-      color: rgba(236, 235, 235, 0.8);  
-    }
+  h2,
+  p {
+    color: rgba(236, 235, 235, 0.8);
+  }
 
-    button{
-        background-color: rgba(236, 231, 231, 0.2);
-        border: 2px solid rgba(251, 247, 247, 0.8);
-    }
-   
+  button {
+    background-color: rgba(236, 231, 231, 0.2);
+    border: 2px solid rgba(251, 247, 247, 0.8);
+  }
 }
 
-.card::after{
-    width: 100%;
-    height: 100%;
-    content: "";
-    background-image: url("../../assets/images/cardLogin.png");
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-size: cover;
-    background-position: center;
-    z-index: 0;
+.card::after {
+  width: 100%;
+  height: 100%;
+  content: "";
+  background-image: url("../../assets/images/cardLogin.png");
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
 }
 
-.card.loginActive .fcLogin{
-    opacity: 0;
-    pointer-events: none;
+.card.loginActive .fcLogin {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.card.loginActive .fcCd{
-    transform: translateX(0);
-    transition: all .3s .3s;
+.card.loginActive .fcCd {
+  transform: translateX(0);
+  transition: all 0.3s 0.3s;
 }
 
-.card.card.loginActive .formLogin{
-    transform: translateX(0);
-    opacity: 1;
-    transition: all .3s .3s;
+.card.card.loginActive .formLogin {
+  transform: translateX(0);
+  opacity: 1;
+  transition: all 0.3s 0.3s;
 }
 
-.card.loginActive .formCadastro{
-    opacity: 0;
-    pointer-events: none;
+.card.loginActive .formCadastro {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.card.loginActive:after{
-    transform: translateX(50%);
+.card.loginActive:after {
+  transform: translateX(50%);
 }
 
-.card.cdActive .fcCd{
-    opacity: 0;
-    pointer-events: none;
+.card.cdActive .fcCd {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.card.cdActive .fcLogin{
-    transform: translateX(0);
-    transition: all .3s .3s;
+.card.cdActive .fcLogin {
+  transform: translateX(0);
+  transition: all 0.3s 0.3s;
 }
 
-.card.cdActive .formCadastro{
-    transform: translateX(0);
-    opacity: 1;
-    transition: all .3s .3s;
+.card.cdActive .formCadastro {
+  transform: translateX(0);
+  opacity: 1;
+  transition: all 0.3s 0.3s;
 }
 
-.card.cdActive .formLogin{
-    opacity: 0;
-    pointer-events: none;
+.card.cdActive .formLogin {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.card.cdActive::after{
-    transform: translateX(-50%);
+.card.cdActive::after {
+  transform: translateX(-50%);
 }
 
-form{
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
-    button{
-        background: linear-gradient(90deg, #0d94eb 0%, #7cbaf7 100%);
-    }
+  button {
+    background: linear-gradient(90deg, #0d94eb 0%, #7cbaf7 100%);
+  }
 }
 
-input, button{
-    padding: 12px 20px;
-    border-radius: 12px;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    width: 400px;
+input,
+button {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  width: 400px;
 }
 
-input{
-    background-color: rgba(255 255 255 /.2);
-    color: rgba(255 255 255 /.8);
-    font-family: "Nexa";
+input {
+  background-color: rgba(255 255 255 /0.2);
+  color: rgba(255 255 255 /0.8);
+  font-family: "Nexa";
 }
 
-input::placeholder{
-    color: rgba(255 255 255 /.5);
+input::placeholder {
+  color: rgba(255 255 255 /0.5);
 }
 
-button{
-    margin-top: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 16px;
-    color: rgba(231, 227, 227, 0.8);
-    transition: all .3s;
+button {
+  margin-top: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 16px;
+  color: rgba(231, 227, 227, 0.8);
+  transition: all 0.3s;
 }
 
-button:hover{
-    transform: translateY(-3px);
+button:hover {
+  transform: translateY(-3px);
 }
 
-.card::after{
-    transition: all .5s;
+.card::after {
+  transition: all 0.5s;
 }
 
-.fcCd{
-    transition: all .3s 0;
-    transform: translateY(200%);
+.fcCd {
+  transition: all 0.3s 0;
+  transform: translateY(200%);
 }
 
-.card.cdActive .fcCd{
-    opacity: 0;
-    transform: translateY(200%);
-    transition: all .3s 0;
+.card.cdActive .fcCd {
+  opacity: 0;
+  transform: translateY(200%);
+  transition: all 0.3s 0;
 }
 
-.fcLogin{
-    transition: all .3s 0;
-    transform: translateY(200%);
+.fcLogin {
+  transition: all 0.3s 0;
+  transform: translateY(200%);
 }
 
-.formCadastro{
-    transition: all .3s 0;
-    transform: translateY(200%);
-    opacity: 0;
+.formCadastro {
+  transition: all 0.3s 0;
+  transform: translateY(200%);
+  opacity: 0;
 }

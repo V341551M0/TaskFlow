@@ -46,12 +46,12 @@ Body:
 
 ### Erros
 
-| Código | Situação | Exemplo de body |
-|---|---|---|
-| `400` | Campo obrigatório vazio | `{ "message": "Informe um nome de usuário." }`, `{ "message": "Informe um e-mail." }`, `{ "message": "Informe uma senha." }` |
-| `409` | E-mail já cadastrado | `{ "message": "Já existe uma conta com este e-mail." }` |
-| `409` | Nome de usuário já em uso | `{ "message": "Este nome de usuário já está em uso." }` |
-| `405` | Método diferente de POST | `{ "message": "Method not allowed" }` |
+| Código | Situação                  | Exemplo de body                                                                                                              |
+| ------ | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `400`  | Campo obrigatório vazio   | `{ "message": "Informe um nome de usuário." }`, `{ "message": "Informe um e-mail." }`, `{ "message": "Informe uma senha." }` |
+| `409`  | E-mail já cadastrado      | `{ "message": "Já existe uma conta com este e-mail." }`                                                                      |
+| `409`  | Nome de usuário já em uso | `{ "message": "Este nome de usuário já está em uso." }`                                                                      |
+| `405`  | Método diferente de POST  | `{ "message": "Method not allowed" }`                                                                                        |
 
 ---
 
@@ -98,10 +98,10 @@ Body:
 
 ### Erros
 
-| Código | Situação | Exemplo de body |
-|---|---|---|
-| `401` | Credenciais inválidas ou usuário inexistente | `{ "message": "E-mail, nome de usuário ou senha inválidos." }` |
-| `405` | Método diferente de POST | `{ "message": "Method not allowed" }` |
+| Código | Situação                                     | Exemplo de body                                                |
+| ------ | -------------------------------------------- | -------------------------------------------------------------- |
+| `401`  | Credenciais inválidas ou usuário inexistente | `{ "message": "E-mail, nome de usuário ou senha inválidos." }` |
+| `405`  | Método diferente de POST                     | `{ "message": "Method not allowed" }`                          |
 
 ---
 

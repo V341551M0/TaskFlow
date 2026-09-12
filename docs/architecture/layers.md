@@ -54,9 +54,9 @@ Exemplos: `TaskDto`, `UserDto`.
 
 ## Utilitários (apoio transversal)
 
-| Classe | Responsabilidade |
-|---|---|
-| `util.DatabaseConnection` | Cria conexões JDBC; aplica as migrações Flyway no startup (falha aborta a inicialização). |
-| `util.Json` | Parse de corpo JSON e serialização de respostas (Map/List/DTO). |
-| `util.PasswordUtil` | Hash SHA-256 com salt e verificação em tempo constante. |
-| `dto.TaskDto` / `dto.UserDto` | Contratos de dados das camadas de serviço e persistência. |
+| Classe                        | Responsabilidade                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `util.DatabaseConnection`     | Cria conexões JDBC; aplica as migrações Flyway no startup (falha aborta a inicialização). |
+| `util.Json`                   | Parse de corpo JSON e serialização de respostas (Map/List/DTO).                           |
+| `util.PasswordUtil`           | Hash SHA-256 com salt e verificação em tempo constante.                                   |
+| `dto.TaskDto` / `dto.UserDto` | Contratos de dados das camadas de serviço e persistência.                                 |

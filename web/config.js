@@ -11,6 +11,9 @@
  */
 (function () {
   var host = window.location.hostname;
-  var defaultUrl = (host === 'localhost' || host === '127.0.0.1') ? 'http://' + host + ':8080' : '';
+  var defaultUrl =
+    host === "localhost" || host === "127.0.0.1"
+      ? "http://" + host + ":8080"
+      : "";
   window.TASKFLOW_API_URL = window.TASKFLOW_API_URL || defaultUrl;
 })();

@@ -22,7 +22,7 @@ Frontend (web/)  →  HTTP/JSON  →  Controller  →  Service  →  Repository 
 - Maven 3.8+
 - MySQL 8
 - Git
-- *(opcional)* VS Code com Live Server para servir o frontend
+- _(opcional)_ VS Code com Live Server para servir o frontend
 
 ### Passos
 
@@ -45,12 +45,12 @@ Cadastre um usuário (informe nome, e-mail e senha) e explore a aplicação. O l
 
 ## Tecnologias
 
-| Camada | Tecnologia |
-|---|---|
-| Backend | Java 17, `HttpServer` do JDK, JDBC |
-| Banco de dados | MySQL 8 |
-| Frontend | HTML, CSS, JavaScript (sem framework) |
-| Build/Testes | Maven, JUnit 5 |
+| Camada         | Tecnologia                            |
+| -------------- | ------------------------------------- |
+| Backend        | Java 17, `HttpServer` do JDK, JDBC    |
+| Banco de dados | MySQL 8                               |
+| Frontend       | HTML, CSS, JavaScript (sem framework) |
+| Build/Testes   | Maven, JUnit 5                        |
 
 ## Principais funcionalidades
 

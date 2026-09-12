@@ -1,6 +1,6 @@
 # Decisões Arquiteturais
 
-Este documento registra as principais decisões de projeto e o motivo de cada uma. Serve como referência para entender *por que* o sistema é estruturado assim.
+Este documento registra as principais decisões de projeto e o motivo de cada uma. Serve como referência para entender _por que_ o sistema é estruturado assim.
 
 ## 1. Arquitetura em camadas
 

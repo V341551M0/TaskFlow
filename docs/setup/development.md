@@ -8,7 +8,7 @@ Guia para rodar o TaskFlow localmente do zero.
 - **Maven 3.8+**
 - **MySQL 8** (o app usa `mysql-connector-j`) — **obrigatório** no sistema, em `127.0.0.1:3306`
 - **Git**
-- *(opcional)* VS Code com a extensão **Live Server** para servir o frontend
+- _(opcional)_ VS Code com a extensão **Live Server** para servir o frontend
 
 > O backend usa apenas o `HttpServer` embutido do JDK — **não** é necessário instalar Tomcat nem Spring Boot.
 >
@@ -71,15 +71,15 @@ O frontend é estático. Com o Live Server do VS Code:
 
 O `run.sh` carrega um arquivo `.env` na raiz do projeto (ignorado pelo Git) se existir, e pode sobrescrever qualquer variável abaixo. Em produção, defina as variáveis explicitamente no ambiente — **não dependa dos padrões de desenvolvimento**.
 
-| Variável | Padrão | Descrição |
-|---|---|---|
-| `MYSQL_HOST` | `127.0.0.1` | Host do MySQL do sistema. |
-| `MYSQL_PORT` | `3306` | Porta do MySQL do sistema. |
-| `MYSQL_DB` | `taskflow_db` | Nome do banco (criado automaticamente). |
-| `MYSQL_USER` | `taskflow` | Usuário da aplicação. |
-| `MYSQL_PASSWORD` | `TaskFlow@2026` | Senha padrão de **desenvolvimento** (use outra em produção). |
-| `JWT_SECRET` | *(sem padrão — obrigatória)* | Segredo de assinatura HS256 do JWT (mín. 32 caracteres). Se ausente, o `run.sh` gera uma e salva no `.env`; a aplicação **recusa iniciar** sem ela. |
-| `PORT` | `8080` | Porta da API (via `server.port` ou `PORT`). |
+| Variável         | Padrão                       | Descrição                                                                                                                                           |
+| ---------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MYSQL_HOST`     | `127.0.0.1`                  | Host do MySQL do sistema.                                                                                                                           |
+| `MYSQL_PORT`     | `3306`                       | Porta do MySQL do sistema.                                                                                                                          |
+| `MYSQL_DB`       | `taskflow_db`                | Nome do banco (criado automaticamente).                                                                                                             |
+| `MYSQL_USER`     | `taskflow`                   | Usuário da aplicação.                                                                                                                               |
+| `MYSQL_PASSWORD` | `TaskFlow@2026`              | Senha padrão de **desenvolvimento** (use outra em produção).                                                                                        |
+| `JWT_SECRET`     | _(sem padrão — obrigatória)_ | Segredo de assinatura HS256 do JWT (mín. 32 caracteres). Se ausente, o `run.sh` gera uma e salva no `.env`; a aplicação **recusa iniciar** sem ela. |
+| `PORT`           | `8080`                       | Porta da API (via `server.port` ou `PORT`).                                                                                                         |
 
 Os mesmos padrões são usados por `run.sh` e por `util/DatabaseConnection`.
 

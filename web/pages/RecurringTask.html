@@ -1,107 +1,110 @@
-<!DOCTYPE html>
-<html lang='pt-BR'>
-<head>
-    <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <meta http-equiv='Content-Security-Policy' content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080 http://127.0.0.1:8080">
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:8080 http://127.0.0.1:8080"
+    />
     <title>Tarefas Recorrentes</title>
     <script src="../config.js"></script>
-    <link rel="stylesheet" href="../css/pages/layoutRT.css">
+    <link rel="stylesheet" href="../css/pages/layoutRT.css" />
     <script src="../js/pages/RecurringTask.js" defer></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-
-        <div class="container-buttons">
-            <!-- Botões de Navegação -->
-            <nav class="nav-buttons">
-                <a href="../index.html">
-                    <button type="button">Voltar para Página Inicial</button>
-                </a>
-                <button type="button" class="logout-btn">Sair</button>
-            </nav>
-            <!--Botões de Criação-->
-            <nav class="new-class-button">
-                <button type="button" id="btn-nova-recorrente">Criar nova Tarefa Recorrente</button>
-            </nav>
-        </div>
-
-        <section class="metrics-grid">
-            <article class="card">
-                <h3>Tarefas Recorrentes</h3>
-                <p class="metric-value" id="recurring-count">0/-</p>
-            </article>
-            <article class="card">
-                <h3>Sequencia Atual</h3>
-                <p class="metric-value">0/-</p>
-            </article>
-            <article class="card">
-                <h3>Maior Sequencua</h3>
-                <p class="metric-value">0/-</p>
-            </article>
-        </section>
-
-        <section class="card list-section-card">
-            <div class="card-header">
-                <h2>Lista de Tarefas Recorrentes</h2>
-            </div>
-            <div id="recurring-list" class="items-list"></div>
-        </section>
-
-        <!-- Modal (janela de criação)-->
-         <div id="modal-task" class="modal" style="display: none;">
-            <div class="modal-content">
-                <span class="cose-btn">&times;</span>
-                <h2>Criar Tarefa Recorrente</h2>
-                <p class="modal-subtitle">Defina uma tarefa recorrente e acompanhe o desempenho no mapa de calor.</p>
-
-                <form id="form-task">
-                    <label for="nome">Nome:</label>
-                    <input type="text" id="nome" required>
-
-                    <label for="data">Data:</label>
-                    <input type="date" id="data">
-
-                    <label for="diario">Todos os Dias?</label>
-                    <input type="checkbox" id="diario">
-
-                    <label for="vezes-dia">Vezes ao dia:</label>
-                    <input type="number" id="vezes-dia" min="1" value="1">
-
-                    <button type="submit">Salvar</button>
-                </form>
-            </div>
-         </div>
-
-    <!-- Painel do Mapa de Calor -->
-    <section class="card heatmap-card">
-      <h2>Atividade no Último Ano</h2>
-
-      <!-- Container do Mapa de Calor -->
-      <div class="heatmap-wrapper">
-
-        <!-- Rótulos dos Dias da Semana -->
-        <ul class="weekdays">
-          <li>Dom</li>
-          <li>Seg</li>
-          <li>Ter</li>
-          <li>Qua</li>
-          <li>Qui</li>
-          <li>Sex</li>
-          <li>Sab</li>
-        </ul>
-
-        <!-- Calendário -->
-        <div class="calendar">
-
-          <!-- Dias (semanas em colunas x 7 dias) -->
-          <div id="heatmap"></div>
-
-        </div>
-
+      <div class="container-buttons">
+        <!-- Botões de Navegação -->
+        <nav class="nav-buttons">
+          <a href="../index.html">
+            <button type="button">Voltar para Página Inicial</button>
+          </a>
+          <button type="button" class="logout-btn">Sair</button>
+        </nav>
+        <!--Botões de Criação-->
+        <nav class="new-class-button">
+          <button type="button" id="btn-nova-recorrente">
+            Criar nova Tarefa Recorrente
+          </button>
+        </nav>
       </div>
-    </section>
+
+      <section class="metrics-grid">
+        <article class="card">
+          <h3>Tarefas Recorrentes</h3>
+          <p class="metric-value" id="recurring-count">0/-</p>
+        </article>
+        <article class="card">
+          <h3>Sequencia Atual</h3>
+          <p class="metric-value">0/-</p>
+        </article>
+        <article class="card">
+          <h3>Maior Sequencua</h3>
+          <p class="metric-value">0/-</p>
+        </article>
+      </section>
+
+      <section class="card list-section-card">
+        <div class="card-header">
+          <h2>Lista de Tarefas Recorrentes</h2>
+        </div>
+        <div id="recurring-list" class="items-list"></div>
+      </section>
+
+      <!-- Modal (janela de criação)-->
+      <div id="modal-task" class="modal" style="display: none">
+        <div class="modal-content">
+          <span class="cose-btn">&times;</span>
+          <h2>Criar Tarefa Recorrente</h2>
+          <p class="modal-subtitle">
+            Defina uma tarefa recorrente e acompanhe o desempenho no mapa de
+            calor.
+          </p>
+
+          <form id="form-task">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" required />
+
+            <label for="data">Data:</label>
+            <input type="date" id="data" />
+
+            <label for="diario">Todos os Dias?</label>
+            <input type="checkbox" id="diario" />
+
+            <label for="vezes-dia">Vezes ao dia:</label>
+            <input type="number" id="vezes-dia" min="1" value="1" />
+
+            <button type="submit">Salvar</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Painel do Mapa de Calor -->
+      <section class="card heatmap-card">
+        <h2>Atividade no Último Ano</h2>
+
+        <!-- Container do Mapa de Calor -->
+        <div class="heatmap-wrapper">
+          <!-- Rótulos dos Dias da Semana -->
+          <ul class="weekdays">
+            <li>Dom</li>
+            <li>Seg</li>
+            <li>Ter</li>
+            <li>Qua</li>
+            <li>Qui</li>
+            <li>Sex</li>
+            <li>Sab</li>
+          </ul>
+
+          <!-- Calendário -->
+          <div class="calendar">
+            <!-- Dias (semanas em colunas x 7 dias) -->
+            <div id="heatmap"></div>
+          </div>
+        </div>
+      </section>
     </div>
     <script src="../js/app.js"></script>
-</body>
+  </body>
 </html>
